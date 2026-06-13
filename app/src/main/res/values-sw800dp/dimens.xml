@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 12寸+云笔电适配 -->
+    <dimen name="grid_column_count">6</dimen>
+    <dimen name="grid_row_count">5</dimen>
+    <dimen name="icon_size">72dp</dimen>
+    <dimen name="clock_text_size">120sp</dimen>
+    <dimen name="weather_card_width">360dp</dimen>
+    <dimen name="weather_temp_size">36sp</dimen>
+</resources>

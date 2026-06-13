@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 10寸平板适配 -->
+    <dimen name="grid_column_count">5</dimen>
+    <dimen name="grid_row_count">4</dimen>
+    <dimen name="icon_size">64dp</dimen>
+    <dimen name="clock_text_size">108sp</dimen>
+    <dimen name="weather_card_width">320dp</dimen>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AnDesk Launcher</string>
+    
+    <!-- 主界面 -->
+    <string name="all_apps">所有应用</string>
+    <string name="settings">设置</string>
+    <string name="recent_apps">最近应用</string>
+    
+    <!-- 设置 -->
+    <string name="settings_clock">时钟</string>
+    <string name="settings_24hour">24小时制</string>
+    <string name="settings_weather">天气</string>
+    <string name="settings_show_weather">显示天气</string>
+    <string name="settings_weather_city">天气城市</string>
+    <string name="settings_floating">Home小圆点</string>
+    <string name="settings_floating_enable">启用Home小圆点</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_version">版本</string>
+    <string name="settings_device_info">设备信息</string>
+    
+    <!-- 天气 -->
+    <string name="weather_loading">加载中...</string>
+    <string name="weather_error">天气不可用</string>
+    <string name="weather_temp">%1$d°C</string>
+    <string name="weather_humidity">湿度 %1$d%%</string>
+    <string name="weather_wind">%1$s %2$s级</string>
+    
+    <!-- 最近应用 -->
+    <string name="clear_all">全部关闭</string>
+    <string name="memory_usage">内存: %1$dMB / %2$dMB (%3$d%%)</string>
+    <string name="app_killed">已清理</string>
+    
+    <!-- 通用 -->
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="back">返回</string>
+</resources>
