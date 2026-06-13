@@ -16,16 +16,15 @@ class App : Application(), Configuration.Provider {
         const val CHANNEL_FLOATING = "floating_service"
     }
 
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .build()
+
     override fun onCreate() {
         super.onCreate()
         instance = this
         createNotificationChannels()
-    }
-
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setMinimumLoggingLevel(android.util.Log.INFO)
-            .build()
     }
 
     private fun createNotificationChannels() {
