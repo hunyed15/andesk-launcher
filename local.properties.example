@@ -1,0 +1,13 @@
+# Local Properties Configuration
+# Copy this file to local.properties and fill in your values
+# DO NOT commit local.properties to version control
+
+# Android SDK Location (auto-detected by Android Studio)
+# sdk.dir=/path/to/android/sdk
+
+# 和风天气API Key
+# 申请地址: https://dev.qweather.com/
+QWEATHER_API_KEY=your_api_key_here
+
+# Other API keys can be added here
+# WEATHER_API_KEY=your_key_here

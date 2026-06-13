@@ -15,6 +15,12 @@ android {
         versionName = "1.0.0"
         
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // 从环境变量或local.properties读取API Key
+        val qweatherApiKey: String = project.findProperty("QWEATHER_API_KEY") as? String
+            ?: System.getenv("QWEATHER_API_KEY")
+            ?: "YOUR_API_KEY_HERE"
+        buildConfigField("String", "QWEATHER_API_KEY", "\"$qweatherApiKey\"")
     }
 
     buildTypes {
@@ -43,6 +49,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true  // 启用BuildConfig
     }
 }
 

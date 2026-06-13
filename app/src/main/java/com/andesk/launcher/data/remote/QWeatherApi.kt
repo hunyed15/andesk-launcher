@@ -1,5 +1,6 @@
 package com.andesk.launcher.data.remote
 
+import com.andesk.launcher.BuildConfig
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -11,8 +12,8 @@ import retrofit2.http.Query
 interface QWeatherApi {
 
     companion object {
-        // TODO: 替换为你的和风天气API Key
-        const val API_KEY = "YOUR_API_KEY_HERE"
+        // 从BuildConfig读取API Key（编译时从环境变量注入）
+        val API_KEY: String = BuildConfig.QWEATHER_API_KEY
         const val BASE_URL = "https://devapi.qweather.com"
     }
 

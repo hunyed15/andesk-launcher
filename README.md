@@ -2,6 +2,7 @@
 
 > 面向大屏安卓设备的简洁桌面启动器
 
+[![Build](https://github.com/hunyed15/andesk-launcher/actions/workflows/build.yml/badge.svg)](https://github.com/hunyed15/andesk-launcher/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-green.svg)](https://developer.android.com)
 [![API](https://img.shields.io/badge/API-26%2B-blue.svg)](https://developer.android.com)
@@ -37,21 +38,28 @@
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/yourusername/andesk-launcher.git
+   git clone https://github.com/hunyed15/andesk-launcher.git
+   cd andesk-launcher
    ```
 
-2. **用Android Studio打开**
+2. **配置API Key**
+   
+   复制配置文件模板：
+   ```bash
+   cp local.properties.example local.properties
+   ```
+   
+   编辑 `local.properties`，填入你的和风天气API Key：
+   ```properties
+   QWEATHER_API_KEY=your_api_key_here
+   ```
+   
+   > 🔑 **获取API Key**: 注册 [和风天气开发者账号](https://dev.qweather.com/) → 创建项目 → 获取Key
+
+3. **用Android Studio打开**
    - 打开 Android Studio
    - 选择 `File > Open`
-   - 选择 `andesk-launcher` 文件夹
-
-3. **配置API Key**
-   - 注册 [和风天气](https://dev.qweather.com/) 账号
-   - 获取API Key
-   - 在 `app/src/main/java/com/andesk/launcher/data/remote/QWeatherApi.kt` 中替换：
-     ```kotlin
-     const val API_KEY = "YOUR_API_KEY_HERE"
-     ```
+   - 选择项目文件夹
 
 4. **运行项目**
    - 连接安卓设备或启动模拟器
@@ -62,6 +70,44 @@
 1. 按 `Home` 键
 2. 选择 `AnDesk Launcher` 作为默认桌面
 3. 或在 `设置 > 应用 > 默认应用 > 主屏幕应用` 中选择
+
+## 🔧 CI/CD 配置
+
+项目使用 GitHub Actions 自动构建。
+
+### 设置 GitHub Secrets
+
+1. 打开仓库页面: https://github.com/hunyed15/andesk-launcher/settings/secrets/actions
+2. 点击 `New repository secret`
+3. 添加以下 Secret:
+
+   | Name | Value |
+   |------|-------|
+   | `QWEATHER_API_KEY` | 你的和风天气API Key |
+
+### 自动构建
+
+- 每次推送到 `main` 分支会自动构建
+- 每次 Pull Request 会自动构建
+- 构建产物可在 Actions 页面下载
+
+### 发布新版本
+
+```bash
+# 1. 更新版本号 (编辑 app/build.gradle.kts)
+# versionCode = 2
+# versionName = "1.1.0"
+
+# 2. 提交更改
+git add .
+git commit -m "chore: bump version to 1.1.0"
+
+# 3. 创建tag并推送
+git tag v1.1.0
+git push origin main --tags
+```
+
+GitHub Actions 会自动创建 Release 并上传 APK。
 
 ## 📁 项目结构
 
@@ -83,11 +129,7 @@ andesk-launcher/
 │   ├── receiver/                 # 广播接收器
 │   └── util/                     # 工具类
 ├── app/src/main/res/             # 资源文件
-│   ├── layout/                   # 布局
-│   ├── drawable/                 # 图标、背景
-│   ├── values/                   # 基础资源
-│   ├── values-sw600dp/           # 10寸平板
-│   └── values-sw800dp/           # 12寸+设备
+├── .github/workflows/            # GitHub Actions
 └── build.gradle.kts              # 构建配置
 ```
 
@@ -114,14 +156,16 @@ andesk-launcher/
 | 启动 | 延迟初始化非关键组件 |
 | 后台 | 最小化服务，按需启动 |
 
-## 📝 开发计划
+## 📝 更新日志
 
-- [x] 项目搭建
-- [ ] M1: 基础桌面 + 图标网格
-- [ ] M2: 时钟 + 天气 + Dock栏
-- [ ] M3: 通知栏 + 后台管理
-- [ ] M4: Home小圆点 + 设置
-- [ ] M5: 测试 + 发布
+### v1.0.0 (2026-06-13)
+- 🎉 初始版本发布
+- ✨ 主桌面应用网格
+- ✨ 实时时钟和天气卡片
+- ✨ Dock栏应用管理
+- ✨ Home小圆点悬浮窗
+- ✨ 最近应用和内存清理
+- ✨ 设置页面
 
 ## 🤝 贡献
 
@@ -129,7 +173,7 @@ andesk-launcher/
 
 1. Fork 本仓库
 2. 创建你的分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交你的改动 (`git commit -m 'Add some AmazingFeature'`)
+3. 提交你的改动 (`git commit -m 'feat: Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开一个 Pull Request
 
@@ -145,5 +189,5 @@ andesk-launcher/
 
 ## 📧 联系方式
 
-- 项目链接: [https://github.com/yourusername/andesk-launcher](https://github.com/yourusername/andesk-launcher)
-- 问题反馈: [Issues](https://github.com/yourusername/andesk-launcher/issues)
+- 项目链接: [https://github.com/hunyed15/andesk-launcher](https://github.com/hunyed15/andesk-launcher)
+- 问题反馈: [Issues](https://github.com/hunyed15/andesk-launcher/issues)
