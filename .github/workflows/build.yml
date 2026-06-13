@@ -4,6 +4,7 @@ on:
   # 推送到main分支时触发
   push:
     branches: [ main ]
+    tags: [ 'v*' ]  # 推送v开头的tag时触发
   # Pull Request时触发
   pull_request:
     branches: [ main ]
