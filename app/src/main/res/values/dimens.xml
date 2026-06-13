@@ -14,7 +14,7 @@
     
     <!-- 天气卡片 -->
     <dimen name="weather_card_width">280dp</dimen>
-    <dimen name="weather_card_height">wrap_content</dimen>
+    <dimen name="weather_card_height">120dp</dimen>
     <dimen name="weather_temp_size">32sp</dimen>
     <dimen name="weather_icon_size">48dp</dimen>
     
