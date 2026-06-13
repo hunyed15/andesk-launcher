@@ -27,6 +27,8 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            // 使用debug签名（测试用，正式发布请替换为正式签名）
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
