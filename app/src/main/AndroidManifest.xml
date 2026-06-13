@@ -30,6 +30,18 @@
         android:theme="@style/AppTheme"
         tools:targetApi="34">
 
+        <!-- 禁用WorkManager默认初始化（使用on-demand初始化） -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <!-- 主桌面Activity（设置为Launcher） -->
         <activity
             android:name=".ui.home.HomeActivity"
