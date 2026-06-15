@@ -7,8 +7,12 @@ import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.provider.Settings
 import com.andesk.launcher.data.model.AppInfo
+import java.text.Collator
+import java.util.Locale
 
 object AppUtils {
+
+    private val chineseCollator: Collator = Collator.getInstance(Locale.CHINA)
 
     /**
      * 获取所有可启动的应用
@@ -32,7 +36,17 @@ object AppUtils {
                         android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
                 )
             }
-            .sortedBy { it.name.lowercase() }
+            .sortedWith(compareByDescending<AppInfo> { hasChineseName(it.name) }
+                .thenComparator { left, right ->
+                    chineseCollator.compare(left.name, right.name)
+                }
+                .thenBy { it.packageName })
+    }
+
+    private fun hasChineseName(name: String): Boolean {
+        return name.any { char ->
+            Character.UnicodeScript.of(char.code) == Character.UnicodeScript.HAN
+        }
     }
 
     /**

@@ -23,12 +23,38 @@
 -keepattributes *Annotation*
 -keep class com.google.gson.** { *; }
 -keep class com.andesk.launcher.data.remote.** { *; }
+-keep class com.andesk.launcher.data.local.** { *; }
 
-# Glide
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep class * extends com.bumptech.glide.module.AppGlideModule {
-    <init>(...);
+# 保留TypeToken的泛型签名
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# 保留泛型签名
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
+
+# 今日诗词 SDK
+-keep class com.jinrishici.** { *; }
+-dontwarn com.jinrishici.**
+
+# Coil
+-keep class coil.** { *; }
+-keep class coil.decode.** { *; }
+-keep class coil.fetch.** { *; }
+-keep class coil.request.** { *; }
+-keep class coil.target.** { *; }
+-keep class coil.transition.** { *; }
+-keep class coil.util.** { *; }
+
+# Epoxy
+-keep class com.airbnb.epoxy.** { *; }
+-keep class * extends com.airbnb.epoxy.EpoxyController { *; }
+-keep class * extends com.airbnb.epoxy.EpoxyModel { *; }
+-keep class * extends com.airbnb.epoxy.EpoxyModelWithHolder { *; }
+-keepclassmembers class * extends com.airbnb.epoxy.EpoxyHolder {
+    public <init>(android.view.View);
 }
+-keepattributes *Annotation*
 
 # 数据模型
 -keep class com.andesk.launcher.data.model.** { *; }

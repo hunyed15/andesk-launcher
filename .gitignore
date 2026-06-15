@@ -13,6 +13,8 @@
 bin/
 gen/
 out/
+.backup_v1/
+.backup_v1_before_refactor/
 
 # Gradle files
 .gradle/

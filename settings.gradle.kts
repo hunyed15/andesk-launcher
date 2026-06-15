@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AnDesk Launcher"
+rootProject.name = "安云桌面"
 include(":app")

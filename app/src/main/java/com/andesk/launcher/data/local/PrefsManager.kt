@@ -3,7 +3,6 @@ package com.andesk.launcher.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class PrefsManager(context: Context) {
 
@@ -18,11 +17,6 @@ class PrefsManager(context: Context) {
         private const val KEY_WEATHER_CITY_ID = "weather_city_id"
         private const val KEY_TEMP_UNIT = "temp_unit" // C or F
         
-        // 小圆点设置
-        private const val KEY_FLOATING_ENABLED = "floating_enabled"
-        private const val KEY_FLOATING_X = "floating_x"
-        private const val KEY_FLOATING_Y = "floating_y"
-        private const val KEY_FLOATING_ALPHA = "floating_alpha"
         
         // 壁纸设置
         private const val KEY_WALLPAPER_URI = "wallpaper_uri"
@@ -32,14 +26,41 @@ class PrefsManager(context: Context) {
         private const val KEY_WEATHER_CACHE = "weather_cache"
         private const val KEY_WEATHER_CACHE_TIME = "weather_cache_time"
         
+        // 主题设置
+        private const val KEY_THEME_MODE = "theme_mode" // light, dark
+        
+        // 按键映射设置
+        private const val KEY_MAPPING_ENABLED = "key_mapping_enabled"
+        private const val KEY_MAPPING_SINGLE_CLICK = "key_mapping_single_click" // home, none
+        private const val KEY_MAPPING_SHOW_TOAST = "key_mapping_show_toast"
+        
         // 其他
         private const val KEY_FIRST_LAUNCH = "first_launch"
+        private const val KEY_BOOT_START = "boot_start"
     }
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
 
     // ==================== 桌面设置 ====================
+
+    var themeMode: String
+        get() = prefs.getString(KEY_THEME_MODE, "light") ?: "light"
+        set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
+
+    // ==================== 按键映射设置 ====================
+
+    var keyMappingEnabled: Boolean
+        get() = prefs.getBoolean(KEY_MAPPING_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_MAPPING_ENABLED, value).apply()
+
+    var keyMappingSingleClick: String
+        get() = prefs.getString(KEY_MAPPING_SINGLE_CLICK, "home") ?: "home"
+        set(value) = prefs.edit().putString(KEY_MAPPING_SINGLE_CLICK, value).apply()
+
+    var keyMappingShowToast: Boolean
+        get() = prefs.getBoolean(KEY_MAPPING_SHOW_TOAST, true)
+        set(value) = prefs.edit().putBoolean(KEY_MAPPING_SHOW_TOAST, value).apply()
 
     var is24HourFormat: Boolean
         get() = prefs.getBoolean(KEY_CLOCK_FORMAT_24H, true)
@@ -49,35 +70,21 @@ class PrefsManager(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_WEATHER, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_WEATHER, value).apply()
 
+    var bootStart: Boolean
+        get() = prefs.getBoolean(KEY_BOOT_START, true)
+        set(value) = prefs.edit().putBoolean(KEY_BOOT_START, value).apply()
+
     var weatherCity: String
         get() = prefs.getString(KEY_WEATHER_CITY, "上海") ?: "上海"
         set(value) = prefs.edit().putString(KEY_WEATHER_CITY, value).apply()
 
     var weatherCityId: String
-        get() = prefs.getString(KEY_WEATHER_CITY_ID, "101020100") ?: "101020100"
+        get() = prefs.getString(KEY_WEATHER_CITY_ID, "310000") ?: "310000"
         set(value) = prefs.edit().putString(KEY_WEATHER_CITY_ID, value).apply()
 
     var tempUnit: String
         get() = prefs.getString(KEY_TEMP_UNIT, "C") ?: "C"
         set(value) = prefs.edit().putString(KEY_TEMP_UNIT, value).apply()
-
-    // ==================== 小圆点设置 ====================
-
-    var floatingEnabled: Boolean
-        get() = prefs.getBoolean(KEY_FLOATING_ENABLED, true)
-        set(value) = prefs.edit().putBoolean(KEY_FLOATING_ENABLED, value).apply()
-
-    var floatingX: Int
-        get() = prefs.getInt(KEY_FLOATING_X, -1)
-        set(value) = prefs.edit().putInt(KEY_FLOATING_X, value).apply()
-
-    var floatingY: Int
-        get() = prefs.getInt(KEY_FLOATING_Y, -1)
-        set(value) = prefs.edit().putInt(KEY_FLOATING_Y, value).apply()
-
-    var floatingAlpha: Float
-        get() = prefs.getFloat(KEY_FLOATING_ALPHA, 0.7f)
-        set(value) = prefs.edit().putFloat(KEY_FLOATING_ALPHA, value).apply()
 
     // ==================== 壁纸设置 ====================
 
@@ -94,17 +101,30 @@ class PrefsManager(context: Context) {
     fun getDockApps(): List<String> {
         val json = prefs.getString(KEY_DOCK_APPS, null)
         return if (json != null) {
-            val type = object : TypeToken<List<String>>() {}.type
-            gson.fromJson(json, type)
+            try {
+                // 使用JSONArray解析，避免TypeToken泛型擦除问题
+                val jsonArray = org.json.JSONArray(json)
+                val result = mutableListOf<String>()
+                for (i in 0 until jsonArray.length()) {
+                    result.add(jsonArray.getString(i))
+                }
+                result
+            } catch (e: Exception) {
+                e.printStackTrace()
+                getDefaultDockApps()
+            }
         } else {
-            // 默认Dock应用
-            listOf(
-                "com.android.dialer",
-                "com.android.mms",
-                "com.android.chrome",
-                "com.android.settings"
-            )
+            getDefaultDockApps()
         }
+    }
+
+    private fun getDefaultDockApps(): List<String> {
+        return listOf(
+            "com.android.dialer",
+            "com.android.mms",
+            "com.android.chrome",
+            "com.android.settings"
+        )
     }
 
     fun setDockApps(apps: List<String>) {
@@ -131,8 +151,11 @@ class PrefsManager(context: Context) {
 
     fun isWeatherCacheValid(): Boolean {
         val cacheTime = getWeatherCacheTime()
-        val thirtyMinutes = 30 * 60 * 1000
-        return (System.currentTimeMillis() - cacheTime) < thirtyMinutes
+        return (System.currentTimeMillis() - cacheTime) < 30 * 60 * 1000
+    }
+
+    fun clearWeatherCache() {
+        prefs.edit().remove(KEY_WEATHER_CACHE).remove(KEY_WEATHER_CACHE_TIME).apply()
     }
 
     // ==================== 其他 ====================

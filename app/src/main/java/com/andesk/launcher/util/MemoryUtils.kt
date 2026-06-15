@@ -14,7 +14,7 @@ object MemoryUtils {
     )
 
     /**
-     * 获取内存信息
+     * 获取内存信息字符串，如 "2.4G/4G"
      */
     fun getMemoryInfo(context: Context): MemoryInfo {
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

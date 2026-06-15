@@ -16,11 +16,7 @@ android {
         
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
-        // 从环境变量或local.properties读取API Key
-        val qweatherApiKey: String = project.findProperty("QWEATHER_API_KEY") as? String
-            ?: System.getenv("QWEATHER_API_KEY")
-            ?: "YOUR_API_KEY_HERE"
-        buildConfigField("String", "QWEATHER_API_KEY", "\"$qweatherApiKey\"")
+        buildConfigField("String", "APP_VERSION", "\"${android.defaultConfig.versionName}\"")
     }
 
     buildTypes {
@@ -35,18 +31,23 @@ android {
             )
         }
         debug {
-            isMinifyEnabled = false
+            isMinifyEnabled = true  // 启用代码压缩，优化性能
+            isShrinkResources = true
             applicationIdSuffix = ".debug"
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -77,8 +78,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     
-    // Image Loading - Glide
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    // Image Loading - Coil (更轻量，Kotlin优先)
+    implementation("io.coil-kt:coil:2.5.0")
+    
+    // RecyclerView - 使用原生RecyclerView + 自定义Adapter
     
     // WorkManager - Background Tasks
     implementation("androidx.work:work-runtime-ktx:2.9.0")
@@ -86,6 +89,12 @@ dependencies {
     // JSON
     implementation("com.google.code.gson:gson:2.10.1")
     
+    // 今日诗词 API
+    implementation("com.jinrishici:android-sdk:1.5")
+
+    // 今日诗词 API
+    implementation("com.jinrishici:android-sdk:1.5")
+
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")

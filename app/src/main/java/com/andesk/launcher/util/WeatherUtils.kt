@@ -3,7 +3,7 @@ package com.andesk.launcher.util
 object WeatherUtils {
 
     /**
-     * 和风天气图标代码对应描述
+     * 天气图标代码对应描述
      */
     fun getWeatherDescription(iconCode: String): String {
         return when (iconCode) {

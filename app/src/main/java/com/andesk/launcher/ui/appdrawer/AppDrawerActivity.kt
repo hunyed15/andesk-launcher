@@ -5,7 +5,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andesk.launcher.R
 import com.andesk.launcher.data.local.PrefsManager
@@ -33,6 +33,12 @@ class AppDrawerActivity : AppCompatActivity() {
         initViews()
         setupRecyclerView()
         loadApps()
+        
+        // 搜索胶囊打开时自动聚焦搜索框
+        if (intent.getBooleanExtra("openSearch", false)) {
+            searchView.requestFocus()
+            searchView.isIconified = false
+        }
     }
 
     private fun setupFullScreen() {
@@ -80,7 +86,7 @@ class AppDrawerActivity : AppCompatActivity() {
         }
         
         recyclerView.apply {
-            layoutManager = LinearLayoutManager(this@AppDrawerActivity)
+            layoutManager = GridLayoutManager(this@AppDrawerActivity, 6)
             adapter = this@AppDrawerActivity.adapter
         }
     }

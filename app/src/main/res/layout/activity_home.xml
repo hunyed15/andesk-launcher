@@ -1,194 +1,289 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_wallpaper">
 
-    <!-- 顶部区域：时钟和天气 -->
+    <!-- ==================== 顶部系统栏 ==================== -->
     <LinearLayout
-        android:id="@+id/topArea"
+        android:id="@+id/searchCapsule"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginTop="48dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_glass_pill"
+        android:paddingHorizontal="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+            android:src="@drawable/ic_search" android:tint="@color/muted" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="搜索应用" android:textSize="15sp"
+            android:textColor="@color/muted" android:layout_marginStart="12dp" />
+    </LinearLayout>
+
+    <!-- 右侧组件 -->
+    <LinearLayout
+        android:id="@+id/controlCenter"
+        android:layout_width="wrap_content" android:layout_height="48dp"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/bg_glass_pill" android:paddingHorizontal="16dp"
+        android:layout_marginTop="24dp" android:layout_marginEnd="24dp"
+        android:paddingStart="16dp" android:paddingEnd="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- WiFi -->
+        <ImageView android:id="@+id/btnWifiSettings"
+            android:layout_width="18dp" android:layout_height="18dp"
+            android:src="@drawable/ic_wifi" android:tint="@color/muted"
+            android:contentDescription="WiFi设置"
+            android:layout_marginEnd="12dp" />
+
+        <!-- 电池 -->
+        <FrameLayout android:id="@+id/btnBatterySettings"
+            android:layout_width="28dp" android:layout_height="20dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="电池设置">
+            <ImageView android:layout_width="28dp" android:layout_height="20dp"
+                android:src="@drawable/ic_battery" android:tint="@color/muted"
+                android:scaleType="fitCenter" />
+            <TextView android:id="@+id/tvBatteryPercent"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:gravity="center" android:text="--"
+                android:textSize="7sp" android:textStyle="bold"
+                android:textColor="@color/muted"
+                android:includeFontPadding="false" />
+        </FrameLayout>
+
+        <!-- 分隔线 -->
+        <View android:layout_width="1dp" android:layout_height="20dp"
+            android:background="@color/outline" android:layout_marginEnd="8dp" />
+
+        <!-- 时间 -->
+        <TextView android:id="@+id/statusTime" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="14:32"
+            android:textSize="15sp" android:textColor="@color/muted"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 分隔线 -->
+        <View android:layout_width="1dp" android:layout_height="20dp"
+            android:background="@color/outline" android:layout_marginEnd="8dp" />
+
+        <!-- 清理内存 -->
+        <ImageView android:id="@+id/btnCleanup"
+            android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@drawable/ic_rocket" android:scaleType="centerInside"
+            android:padding="6dp" android:tint="@color/muted"
+            android:contentDescription="清理内存"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 设置 -->
+        <ImageView android:id="@+id/btnSettings"
+            android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@drawable/ic_settings" android:scaleType="centerInside"
+            android:padding="6dp" android:tint="@color/muted"
+            android:contentDescription="设置"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 主题切换 -->
+        <ImageView android:id="@+id/btnThemeToggle"
+            android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@drawable/ic_theme_dark" android:scaleType="centerInside"
+            android:padding="6dp" android:tint="@color/muted"
+            android:contentDescription="切换主题" />
+
+    </LinearLayout>
+
+    <!-- ==================== 主布局 ==================== -->
+    <LinearLayout
+        android:id="@+id/mainLayout"
+        android:layout_width="0dp" android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="80dp" android:layout_marginBottom="100dp"
+        android:layout_marginStart="40dp" android:layout_marginEnd="40dp"
+        app:layout_constraintTop_toBottomOf="@id/searchCapsule"
+        app:layout_constraintBottom_toTopOf="@id/dockBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 时钟 -->
-        <TextView
-            android:id="@+id/tvTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="14:32"
-            android:textSize="96sp"
-            android:textColor="@color/text_primary"
-            android:fontFamily="sans-serif-light" />
+        <!-- ===== 左侧边栏 (30%) ===== -->
+        <LinearLayout
+            android:id="@+id/glanceSidebar"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="30" android:orientation="vertical"
+            android:layout_marginEnd="20dp">
 
-        <!-- 日期 -->
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2026年06月13日 星期五"
-            android:textSize="18sp"
-            android:textColor="@color/text_secondary"
-            android:layout_marginTop="8dp" />
-
-        <!-- 天气卡片 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardWeather"
-            android:layout_width="280dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
-
-                <!-- 天气图标 -->
-                <ImageView
-                    android:id="@+id/ivWeatherIcon"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_weather_sunny"
-                    android:contentDescription="天气图标" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
-
-                    <!-- 温度 -->
-                    <TextView
-                        android:id="@+id/tvWeatherTemp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="28°C"
-                        android:textSize="32sp"
-                        android:textColor="@color/text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <!-- 天气描述 -->
-                    <TextView
-                        android:id="@+id/tvWeatherText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="晴"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary" />
-
+            <!-- 天气卡片（时钟+天气左右布局） -->
+            <FrameLayout
+                android:id="@+id/weatherCard"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_info_card"
+                android:padding="20dp" android:layout_marginBottom="24dp">
+                <ImageView android:id="@+id/weatherBgIcon" android:layout_width="160dp"
+                    android:layout_height="160dp" android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="-20dp" android:layout_marginEnd="-20dp"
+                    android:alpha="0.08" android:rotation="-15" android:scaleType="fitCenter" />
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <!-- 第1行：时间 | 天气图标 -->
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView android:id="@+id/tvTime" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="14:32" android:textSize="58sp"
+                            android:textColor="@color/on_surface"
+                            android:fontFamily="sans-serif-medium" android:textStyle="bold" />
+                        <ImageView android:id="@+id/weatherIcon" android:layout_width="52dp"
+                            android:layout_height="52dp" android:scaleType="fitCenter"
+                            android:layout_marginStart="16dp" />
+                    </LinearLayout>
+                    <!-- 第2行：日期 | 天气摘要 -->
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal"
+                        android:gravity="center_vertical" android:layout_marginTop="2dp">
+                        <TextView android:id="@+id/tvDate" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="06月15日 周一"
+                            android:textSize="13sp" android:textColor="@color/muted"
+                            android:fontFamily="sans-serif-medium" />
+                        <LinearLayout android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:orientation="horizontal"
+                            android:gravity="center_vertical" android:layout_marginStart="12dp">
+                            <TextView android:id="@+id/weatherCity" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="宿迁市"
+                                android:textSize="13sp" android:textColor="@color/muted"
+                                android:fontFamily="sans-serif-medium" />
+                            <TextView android:id="@+id/weatherTemp" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="19°~28°"
+                                android:textSize="14sp" android:textColor="@color/on_surface"
+                                android:fontFamily="sans-serif-medium" android:layout_marginStart="8dp" />
+                            <TextView android:id="@+id/weatherDesc" android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="晴"
+                                android:textSize="13sp" android:textColor="@color/muted"
+                                android:fontFamily="sans-serif-medium" android:layout_marginStart="8dp" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
+            </FrameLayout>
 
-                <!-- 城市 -->
-                <TextView
-                    android:id="@+id/tvWeatherCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="上海"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_secondary" />
+            <!-- 诗词卡片 -->
+            <FrameLayout
+                android:id="@+id/hitokotoCard"
+                android:layout_width="match_parent" android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_info_card" android:padding="24dp">
+                <ImageButton android:id="@+id/btnRefreshHitokoto"
+                    android:layout_width="18dp" android:layout_height="18dp"
+                    android:layout_gravity="top|end" android:background="@drawable/bg_refresh_button"
+                    android:src="@drawable/ic_refresh" android:scaleType="centerInside"
+                    android:padding="4dp" android:contentDescription="刷新" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:gravity="center">
+                    <TextView android:id="@+id/tvHitokoto" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="人生如戏，唯有入戏，方能始终。"
+                        android:textSize="17sp" android:textColor="@color/on_surface"
+                        android:textStyle="italic" android:maxWidth="280dp"
+                        android:maxLines="4" android:ellipsize="end" android:gravity="center" />
+                    <TextView android:id="@+id/tvHitokotoFrom" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text=" ——慕夜"
+                        android:textSize="13sp" android:textColor="@color/muted"
+                        android:textStyle="italic" android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
 
+        <!-- ===== 中间内容区 (70%) ===== -->
+        <LinearLayout
+            android:id="@+id/contentArea"
+            android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="70" android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="20dp">
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent" android:layout_height="0dp"
+                android:layout_weight="1" />
+            <LinearLayout android:id="@+id/pageIndicator"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center"
+                android:layout_marginTop="16dp">
+                <TextView android:id="@+id/dot1" android:layout_width="@dimen/page_indicator_size"
+                    android:layout_height="@dimen/page_indicator_size"
+                    android:gravity="center" android:text="1"
+                    android:textSize="@dimen/page_indicator_text_size"
+                    android:textColor="@color/on_surface"
+                    android:background="@drawable/bg_page_indicator_active"
+                    android:layout_marginEnd="@dimen/page_indicator_spacing" />
+                <TextView android:id="@+id/dot2" android:layout_width="@dimen/page_indicator_size"
+                    android:layout_height="@dimen/page_indicator_size"
+                    android:gravity="center" android:text="2"
+                    android:textSize="@dimen/page_indicator_text_size"
+                    android:textColor="@color/muted"
+                    android:background="@drawable/bg_page_indicator"
+                    android:layout_marginEnd="@dimen/page_indicator_spacing" />
+                <TextView android:id="@+id/dot3" android:layout_width="@dimen/page_indicator_size"
+                    android:layout_height="@dimen/page_indicator_size"
+                    android:gravity="center" android:text="3"
+                    android:textSize="@dimen/page_indicator_text_size"
+                    android:textColor="@color/muted"
+                    android:background="@drawable/bg_page_indicator"
+                    android:layout_marginEnd="@dimen/page_indicator_spacing" />
+                <TextView android:id="@+id/dot4" android:layout_width="@dimen/page_indicator_size"
+                    android:layout_height="@dimen/page_indicator_size"
+                    android:gravity="center" android:text="4"
+                    android:textSize="@dimen/page_indicator_text_size"
+                    android:textColor="@color/muted"
+                    android:background="@drawable/bg_page_indicator" />
             </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- 中间区域：应用网格 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvApps"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:padding="24dp"
-        android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/topArea"
+    <!-- ==================== 浮动底栏 Dock ==================== -->
+    <LinearLayout
+        android:id="@+id/dockBar"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/bg_glass_dock"
+        android:paddingHorizontal="10dp" android:paddingVertical="10dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView android:id="@+id/dockIcon1" android:layout_width="56dp"
+            android:layout_height="56dp" android:layout_marginEnd="8dp"
+            android:padding="8dp" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/dockIcon2" android:layout_width="56dp"
+            android:layout_height="56dp" android:layout_marginEnd="8dp"
+            android:padding="8dp" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/dockIcon3" android:layout_width="56dp"
+            android:layout_height="56dp" android:layout_marginEnd="8dp"
+            android:padding="8dp" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/dockIcon4" android:layout_width="56dp"
+            android:layout_height="56dp" android:layout_marginEnd="8dp"
+            android:padding="8dp" android:scaleType="fitCenter" />
+        <View android:layout_width="1dp" android:layout_height="32dp"
+            android:background="@color/dock_divider" android:layout_marginHorizontal="4dp" />
+        <ImageView android:id="@+id/btnAllApps" android:layout_width="56dp"
+            android:layout_height="56dp" android:src="@drawable/ic_apps_grid"
+            android:scaleType="centerInside" android:tint="@color/muted" />
+    </LinearLayout>
+
+    <!-- Toast -->
+    <TextView android:id="@+id/toastView" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:background="@drawable/bg_toast"
+        android:textColor="@color/on_surface" android:textSize="15sp"
+        android:fontFamily="sans-serif-medium" android:paddingHorizontal="32dp"
+        android:paddingVertical="12dp" android:elevation="8dp" android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/dockBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- 底部Dock栏 -->
-    <LinearLayout
-        android:id="@+id/dockBar"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="24dp"
-        android:background="@color/surface"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <!-- Dock应用占位 -->
-        <ImageView
-            android:id="@+id/dockApp1"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:scaleType="centerInside"
-            android:contentDescription="Dock应用1" />
-
-        <ImageView
-            android:id="@+id/dockApp2"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:scaleType="centerInside"
-            android:contentDescription="Dock应用2" />
-
-        <ImageView
-            android:id="@+id/dockApp3"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:scaleType="centerInside"
-            android:contentDescription="Dock应用3" />
-
-        <ImageView
-            android:id="@+id/dockApp4"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:scaleType="centerInside"
-            android:contentDescription="Dock应用4" />
-
-        <!-- 分隔线 -->
-        <View
-            android:layout_width="1dp"
-            android:layout_height="32dp"
-            android:layout_marginHorizontal="8dp"
-            android:background="@color/text_hint" />
-
-        <!-- 所有应用按钮 -->
-        <ImageView
-            android:id="@+id/btnAllApps"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_apps_grid"
-            android:scaleType="centerInside"
-            android:padding="8dp"
-            android:contentDescription="所有应用" />
-
-        <!-- 设置按钮 -->
-        <ImageView
-            android:id="@+id/btnSettings"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/ic_settings"
-            android:scaleType="centerInside"
-            android:padding="8dp"
-            android:contentDescription="设置" />
-
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

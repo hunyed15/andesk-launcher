@@ -1,23 +1,26 @@
 package com.andesk.launcher.ui.home
 
-import android.Manifest
-import android.app.AlertDialog
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
+import android.os.BatteryManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.viewpager2.widget.ViewPager2
 import com.andesk.launcher.R
 import com.andesk.launcher.data.local.PrefsManager
 import com.andesk.launcher.data.model.AppInfo
@@ -25,10 +28,13 @@ import com.andesk.launcher.data.model.WeatherInfo
 import com.andesk.launcher.data.repository.AppRepository
 import com.andesk.launcher.data.repository.WeatherRepository
 import com.andesk.launcher.receiver.PackageReceiver
+import com.andesk.launcher.receiver.ScreenReceiver
 import com.andesk.launcher.ui.appdrawer.AppDrawerActivity
-import com.andesk.launcher.ui.floating.FloatingService
 import com.andesk.launcher.ui.settings.SettingsActivity
-import com.andesk.launcher.util.WeatherUtils
+import com.andesk.launcher.service.KeyMappingService
+import com.andesk.launcher.util.MemoryUtils
+import coil.imageLoader
+import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,19 +45,24 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var appRepository: AppRepository
     private lateinit var weatherRepository: WeatherRepository
     
-    private lateinit var appGridAdapter: AppGridAdapter
-    private lateinit var recyclerView: RecyclerView
+    // 分页
+    private lateinit var viewPager: ViewPager2
+    private lateinit var pageAdapter: AppPageAdapter
+    private lateinit var pageIndicator: View
     
     // 时钟视图
     private lateinit var tvTime: TextView
     private lateinit var tvDate: TextView
     
-    // 天气视图
-    private lateinit var cardWeather: CardView
-    private lateinit var ivWeatherIcon: ImageView
-    private lateinit var tvWeatherTemp: TextView
-    private lateinit var tvWeatherText: TextView
-    private lateinit var tvWeatherCity: TextView
+    // 天气视图 (边栏)
+    private lateinit var weatherIcon: ImageView
+    private lateinit var weatherTemp: TextView
+    private lateinit var weatherCity: TextView
+    private lateinit var weatherDesc: TextView
+    
+    // 诗词视图 (边栏)
+    private lateinit var tvHitokoto: TextView
+    private lateinit var tvHitokotoFrom: TextView
     
     // Dock栏视图
     private lateinit var dockApp1: ImageView
@@ -59,12 +70,55 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var dockApp3: ImageView
     private lateinit var dockApp4: ImageView
     
+    // 顶部视图
+    private lateinit var statusTime: TextView
+    private lateinit var tvBatteryPercent: TextView
+    private lateinit var toastView: TextView
+    
     // 广播接收器
     private val packageReceiver = PackageReceiver()
+    private val screenReceiver = ScreenReceiver()
+    private val refreshReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                PackageReceiver.ACTION_REFRESH_APPS -> {
+                    appRepository.clearCache()
+                    refreshApps()
+                    loadDockApps()
+                }
+                ScreenReceiver.ACTION_SCREEN_ON -> {
+                    loadWeather()
+                    loadHitokoto()
+                }
+            }
+        }
+    }
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            if (level >= 0 && scale > 0) {
+                tvBatteryPercent.text = ((level * 100) / scale).toString()
+            }
+        }
+    }
     private var isReceiverRegistered = false
+    private var isScreenReceiverRegistered = false
+    private var isRefreshReceiverRegistered = false
+    private var isBatteryReceiverRegistered = false
+    
+    // 编辑模式
+    private var isEditMode = false
+    
+    // Toast Handler
+    private val handler = Handler(Looper.getMainLooper())
+    
+    // 一言刷新定时器
+    private var hitokotoRefreshRunnable: Runnable? = null
+    private val HITOKOTO_REFRESH_INTERVAL = 10 * 60 * 1000L  // 10分钟
 
     companion object {
-        private const val LOCATION_PERMISSION_CODE = 1001
+        private const val PERMISSION_REQUEST_CODE = 1001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,33 +136,43 @@ class HomeActivity : AppCompatActivity() {
         
         // 初始化UI
         initViews()
-        setupAppGrid()
+        setupViewPager()
         setupDockBar()
         setupClickListeners()
         
         // 注册广播接收器
         registerPackageReceiver()
         
-        // 启动服务
-        startFloatingService()
+        // 启动按键映射服务
+        startKeyMappingService()
         
         // 加载数据
         loadWeather()
+        loadHitokoto()
         updateClock()
         
-        // 检查权限
-        checkPermissions()
     }
 
     override fun onResume() {
         super.onResume()
         refreshApps()
         loadDockApps()
+        loadWeather()
+        loadHitokoto()
+        startHitokotoRefreshTimer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 暂停定时刷新
+        stopHitokotoRefreshTimer()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterPackageReceiver()
+        stopHitokotoRefreshTimer()
+        handler.removeCallbacksAndMessages(null)
     }
 
     private fun setupFullScreen() {
@@ -127,53 +191,150 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        // 应用网格
-        recyclerView = findViewById(R.id.rvApps)
+        viewPager = findViewById(R.id.viewPager)
         
         // 时钟
         tvTime = findViewById(R.id.tvTime)
         tvDate = findViewById(R.id.tvDate)
         
-        // 天气卡片
-        cardWeather = findViewById(R.id.cardWeather)
-        ivWeatherIcon = findViewById(R.id.ivWeatherIcon)
-        tvWeatherTemp = findViewById(R.id.tvWeatherTemp)
-        tvWeatherText = findViewById(R.id.tvWeatherText)
-        tvWeatherCity = findViewById(R.id.tvWeatherCity)
+        // 天气 (边栏)
+        weatherIcon = findViewById(R.id.weatherIcon)
+        weatherTemp = findViewById(R.id.weatherTemp)
+        weatherCity = findViewById(R.id.weatherCity)
+        weatherDesc = findViewById(R.id.weatherDesc)
         
         // Dock栏
-        dockApp1 = findViewById(R.id.dockApp1)
-        dockApp2 = findViewById(R.id.dockApp2)
-        dockApp3 = findViewById(R.id.dockApp3)
-        dockApp4 = findViewById(R.id.dockApp4)
+        dockApp1 = findViewById(R.id.dockIcon1)
+        dockApp2 = findViewById(R.id.dockIcon2)
+        dockApp3 = findViewById(R.id.dockIcon3)
+        dockApp4 = findViewById(R.id.dockIcon4)
         
-        // 设置天气卡片可见性
-        cardWeather.visibility = if (prefsManager.showWeather) View.VISIBLE else View.GONE
+        // 诗词
+        tvHitokoto = findViewById(R.id.tvHitokoto)
+        tvHitokotoFrom = findViewById(R.id.tvHitokotoFrom)
+        
+        // 顶部
+        statusTime = findViewById(R.id.statusTime)
+        tvBatteryPercent = findViewById(R.id.tvBatteryPercent)
+        toastView = findViewById(R.id.toastView)
     }
 
-    private fun setupAppGrid() {
-        appGridAdapter = AppGridAdapter(
+    // ==================== 分页设置 ====================
+
+    private fun setupViewPager() {
+        // 固定一行5个图标
+        val columns = 5
+        // 第一页2行，后续页面5行
+        val firstPageRows = 2
+        val otherPageRows = 5
+        
+        pageAdapter = AppPageAdapter(
+            columnsPerRow = columns,
+            firstPageRows = firstPageRows,
+            otherPageRows = otherPageRows,
             onAppClick = { appInfo ->
-                appRepository.launchApp(appInfo.packageName)
+                if (!isEditMode) {
+                    appRepository.launchApp(appInfo.packageName)
+                }
             },
             onAppLongClick = { appInfo ->
-                showAppOptions(appInfo)
+                enterEditMode()
                 true
+            },
+            onFolderClick = { folder ->
+                // 打开文件夹
+                openFolder(folder)
+            },
+            onFolderLongClick = { folder ->
+                // 长按文件夹
+                enterEditMode()
+                true
+            },
+            onUninstallClick = { appInfo ->
+                appRepository.uninstallApp(appInfo.packageName)
             }
         )
         
-        // 根据屏幕尺寸决定列数
-        val spanCount = when {
-            resources.configuration.smallestScreenWidthDp >= 800 -> 6  // 12寸+
-            resources.configuration.smallestScreenWidthDp >= 600 -> 5  // 10寸+
-            else -> 4  // 手机
+        viewPager.apply {
+            adapter = pageAdapter
+            isUserInputEnabled = true
+            // 平滑翻页动画
+            setPageTransformer(com.andesk.launcher.util.SmoothPageTransformer())
         }
         
-        recyclerView.apply {
-            layoutManager = GridLayoutManager(this@HomeActivity, spanCount)
-            adapter = appGridAdapter
+        // 设置页码指示器点击事件
+        setupPageIndicator()
+        
+        // 页码指示器
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updatePageIndicator(position)
+                setupDragForCurrentPage(position)
+            }
+        })
+        viewPager.post { setupDragForCurrentPage(viewPager.currentItem) }
+    }
+
+    private fun setupPageIndicator() {
+        val dots = listOf<TextView>(
+            findViewById(R.id.dot1),
+            findViewById(R.id.dot2),
+            findViewById(R.id.dot3),
+            findViewById(R.id.dot4)
+        )
+        
+        dots.forEachIndexed { index, dot ->
+            dot.setOnClickListener {
+                viewPager.setCurrentItem(index, true)
+            }
         }
     }
+
+    private fun updatePageIndicator(currentPage: Int) {
+        val dots = listOf<TextView>(
+            findViewById(R.id.dot1),
+            findViewById(R.id.dot2),
+            findViewById(R.id.dot3),
+            findViewById(R.id.dot4)
+        )
+        
+        val totalPages = pageAdapter.getPageCount()
+        
+        dots.forEachIndexed { index, dot ->
+            if (index < totalPages) {
+                dot.visibility = View.VISIBLE
+                if (index == currentPage) {
+                    dot.setBackgroundResource(R.drawable.bg_page_indicator_active)
+                    dot.setTextColor(getColor(R.color.on_primary))
+                } else {
+                    dot.setBackgroundResource(R.drawable.bg_page_indicator)
+                    dot.setTextColor(getColor(R.color.muted))
+                }
+            } else {
+                dot.visibility = View.GONE
+            }
+        }
+    }
+
+    // ==================== 权限检查 ====================
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            PERMISSION_REQUEST_CODE -> {
+                // 权限结果处理
+                if (grantResults.isNotEmpty()) {
+                    // 可以在这里处理权限结果
+                }
+            }
+        }
+    }
+
+    // ==================== Dock栏 ====================
 
     private fun setupDockBar() {
         loadDockApps()
@@ -184,12 +345,89 @@ class HomeActivity : AppCompatActivity() {
         dockApp3.setOnClickListener { launchDockApp(2) }
         dockApp4.setOnClickListener { launchDockApp(3) }
         
-        // Dock栏应用长按事件（更换应用）
+        // Dock栏应用长按事件
         dockApp1.setOnLongClickListener { showDockAppSelector(0); true }
         dockApp2.setOnLongClickListener { showDockAppSelector(1); true }
         dockApp3.setOnLongClickListener { showDockAppSelector(2); true }
         dockApp4.setOnLongClickListener { showDockAppSelector(3); true }
     }
+
+    private fun loadDockApps() {
+        val dockApps = appRepository.getDockApps()
+        
+        // 设置Dock应用图标，如果没有应用则显示+
+        setDockIcon(dockApp1, dockApps.getOrNull(0))
+        setDockIcon(dockApp2, dockApps.getOrNull(1))
+        setDockIcon(dockApp3, dockApps.getOrNull(2))
+        setDockIcon(dockApp4, dockApps.getOrNull(3))
+    }
+
+    private fun setDockIcon(imageView: ImageView, appInfo: AppInfo?) {
+        if (appInfo != null) {
+            imageView.clearColorFilter()
+            imageView.setImageDrawable(appInfo.icon)
+            imageView.alpha = 1.0f
+        } else {
+            imageView.setImageResource(R.drawable.ic_add)
+            imageView.setColorFilter(ContextCompat.getColor(this, R.color.muted))
+            imageView.alpha = 0.85f
+        }
+    }
+
+    private fun launchDockApp(index: Int) {
+        val dockApps = appRepository.getDockApps()
+        if (index < dockApps.size) {
+            appRepository.launchApp(dockApps[index].packageName)
+        } else {
+            showDockAppSelector(index)
+        }
+    }
+
+    private fun showDockAppSelector(index: Int) {
+        try {
+            val allApps = appRepository.getInstalledApps()
+            if (allApps.isEmpty()) {
+                showToast("没有可用的应用")
+                return
+            }
+            
+            val appNames = allApps.map { it.name }.toTypedArray()
+            
+            android.app.AlertDialog.Builder(this)
+                .setTitle("选择应用")
+                .setItems(appNames) { _, which ->
+                    if (which in allApps.indices) {
+                        val selectedApp = allApps[which]
+                        updateDockApp(index, selectedApp)
+                    }
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showToast("无法加载应用列表")
+        }
+    }
+
+    private fun updateDockApp(index: Int, appInfo: AppInfo) {
+        try {
+            val currentDockApps = appRepository.getDockApps().toMutableList()
+            
+            while (currentDockApps.size <= index) {
+                currentDockApps.add(appInfo)
+            }
+            
+            currentDockApps[index] = appInfo
+            appRepository.saveDockApps(currentDockApps)
+            loadDockApps()
+            showToast("已添加到Dock栏")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showToast("添加失败")
+        }
+    }
+
+    // ==================== 主题切换 ====================
 
     private fun setupClickListeners() {
         // 所有应用按钮
@@ -197,10 +435,79 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AppDrawerActivity::class.java))
         }
         
+        // 搜索胶囊 → 打开应用抽屉（带搜索）
+        findViewById<View>(R.id.searchCapsule)?.setOnClickListener {
+            val intent = Intent(this, AppDrawerActivity::class.java)
+            intent.putExtra("openSearch", true)
+            startActivity(intent)
+        }
+
+        // WiFi图标 → 打开系统WiFi设置
+        findViewById<View>(R.id.btnWifiSettings)?.setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
+        }
+
+        // 电池图标 → 打开系统电池设置
+        findViewById<View>(R.id.btnBatterySettings)?.setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS))
+        }
+        
         // 设置按钮
         findViewById<View>(R.id.btnSettings)?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+
+        // 清理内存
+        findViewById<View>(R.id.btnCleanup)?.setOnClickListener {
+            cleanupMemory()
+        }
+        
+        // 主题切换按钮
+        findViewById<View>(R.id.btnThemeToggle)?.setOnClickListener {
+            toggleTheme()
+            val isDark = prefsManager.themeMode == "dark"
+            findViewById<ImageView>(R.id.btnThemeToggle)?.setImageResource(
+                if (isDark) R.drawable.ic_theme_dark else R.drawable.ic_theme_light
+            )
+        }
+
+        // 一言刷新按钮
+        findViewById<View>(R.id.btnRefreshHitokoto)?.setOnClickListener {
+            loadHitokoto()
+        }
+        
+        // 点击空白区域退出编辑模式
+        findViewById<View>(android.R.id.content).setOnClickListener {
+            if (isEditMode) exitEditMode()
+        }
+    }
+
+    private fun toggleTheme() {
+        val currentMode = prefsManager.themeMode
+        val newMode = if (currentMode == "dark") "light" else "dark"
+        prefsManager.themeMode = newMode
+        
+        when (newMode) {
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+        
+        showToast(if (newMode == "dark") "已切换到深色模式" else "已切换到浅色模式")
+    }
+
+    // ==================== 编辑模式 ====================
+
+    private fun enterEditMode() {
+        if (isEditMode) return
+        isEditMode = true
+        pageAdapter.setEditMode(true)
+        showToast("编辑模式 — 长按应用可创建文件夹")
+    }
+
+    private fun exitEditMode() {
+        if (!isEditMode) return
+        isEditMode = false
+        pageAdapter.setEditMode(false)
     }
 
     // ==================== 时钟功能 ====================
@@ -209,29 +516,22 @@ class HomeActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val is24Hour = prefsManager.is24HourFormat
         
-        val timeFormat = if (is24Hour) "HH:mm" else "hh:mm a"
-        val dateFormat = "yyyy年MM月dd日 EEEE"
-        
+        val timeFormat = if (is24Hour) "HH:mm" else "hh:mm"
         val timeStr = SimpleDateFormat(timeFormat, Locale.CHINA).format(calendar.time)
-        val dateStr = SimpleDateFormat(dateFormat, Locale.CHINA).format(calendar.time)
-        
         tvTime.text = timeStr
+        statusTime.text = timeStr
+        
+        val days = arrayOf("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六")
+        val dayOfWeek = days[calendar.get(Calendar.DAY_OF_WEEK) - 1]
+        val dateStr = SimpleDateFormat("MM月dd日", Locale.CHINA).format(calendar.time) + " " + dayOfWeek.replace("星期", "周")
         tvDate.text = dateStr
         
-        // 每秒更新
-        window.decorView.postDelayed({ updateClock() }, 1000)
+        handler.postDelayed({ updateClock() }, 1000)
     }
 
     // ==================== 天气功能 ====================
 
     private fun loadWeather() {
-        if (!prefsManager.showWeather) {
-            cardWeather.visibility = View.GONE
-            return
-        }
-        
-        cardWeather.visibility = View.VISIBLE
-        
         lifecycleScope.launch {
             try {
                 val weather = weatherRepository.getWeather()
@@ -248,121 +548,159 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateWeatherUI(weather: WeatherInfo) {
-        tvWeatherTemp.text = weather.tempDisplay
-        tvWeatherText.text = weather.text
-        tvWeatherCity.text = weather.city
-        
-        // 设置天气图标
-        val iconResName = weather.iconResName
-        val iconResId = resources.getIdentifier(iconResName, "drawable", packageName)
-        if (iconResId != 0) {
-            ivWeatherIcon.setImageResource(iconResId)
-        } else {
-            // 默认图标
-            ivWeatherIcon.setImageResource(R.drawable.ic_weather_sunny)
-        }
+        weatherCity.text = weather.city
+        weatherDesc.text = weather.text
+        weatherTemp.text = weather.tempRangeDisplay
+        loadWeatherIcon(weather.icon)
+        // 天气背景图标也加载
+        loadWeatherBgIcon(weather.icon)
+    }
+
+    private fun loadWeatherBgIcon(iconCode: String) {
+        val url = "https://a.hecdn.net/img/common/icon/202106d/$iconCode.png"
+        val bgIcon = findViewById<ImageView>(R.id.weatherBgIcon)
+        imageLoader.enqueue(ImageRequest.Builder(this).data(url).size(360)
+            .target(bgIcon).build())
     }
 
     private fun showWeatherError() {
-        tvWeatherTemp.text = "--°C"
-        tvWeatherText.text = "天气不可用"
-        tvWeatherCity.text = prefsManager.weatherCity
+        weatherTemp.text = "--°~--°"
+        weatherCity.text = prefsManager.weatherCity
+        weatherDesc.text = "暂无数据"
     }
 
-    // ==================== Dock栏功能 ====================
-
-    private fun loadDockApps() {
-        val dockApps = appRepository.getDockApps()
-        
-        // 清空所有Dock图标
-        dockApp1.setImageDrawable(null)
-        dockApp2.setImageDrawable(null)
-        dockApp3.setImageDrawable(null)
-        dockApp4.setImageDrawable(null)
-        
-        // 设置Dock应用图标
-        if (dockApps.isNotEmpty()) dockApp1.setImageDrawable(dockApps[0].icon)
-        if (dockApps.size > 1) dockApp2.setImageDrawable(dockApps[1].icon)
-        if (dockApps.size > 2) dockApp3.setImageDrawable(dockApps[2].icon)
-        if (dockApps.size > 3) dockApp4.setImageDrawable(dockApps[3].icon)
-    }
-
-    private fun launchDockApp(index: Int) {
-        val dockApps = appRepository.getDockApps()
-        if (index < dockApps.size) {
-            appRepository.launchApp(dockApps[index].packageName)
+    private fun loadWeatherIcon(iconCode: String) {
+        val localRes = when (iconCode.toIntOrNull() ?: 100) {
+            in 100..103 -> R.drawable.qweather_100
+            in 104..299 -> R.drawable.qweather_104
+            in 300..399 -> R.drawable.qweather_305
+            in 400..499 -> R.drawable.qweather_400
+            else -> R.drawable.qweather_104
         }
+        val url = "https://a.hecdn.net/img/common/icon/202106d/$iconCode.png"
+        imageLoader.enqueue(ImageRequest.Builder(this).data(url).size(136)
+            .placeholder(localRes).error(localRes).target(weatherIcon).build())
     }
 
-    private fun showDockAppSelector(index: Int) {
-        val allApps = appRepository.getInstalledApps()
-        val appNames = allApps.map { it.name }.toTypedArray()
-        
-        AlertDialog.Builder(this)
-            .setTitle("选择应用")
-            .setItems(appNames) { _, which ->
-                val selectedApp = allApps[which]
-                updateDockApp(index, selectedApp)
+    // ==================== 今日诗词功能 ====================
+
+    private fun loadHitokoto() {
+        lifecycleScope.launch {
+            try {
+                val client = com.jinrishici.sdk.android.JinrishiciClient.getInstance()
+                val sentence = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    client.getOneSentence()
+                }
+                if (sentence != null) {
+                    // 结构: sentence.data.content, sentence.data.origin.author/title/dynasty
+                    val data = sentence.javaClass.getDeclaredField("data").apply { isAccessible = true }.get(sentence)
+                    val content = data?.javaClass?.getDeclaredField("content")?.apply { isAccessible = true }?.get(data) as? String ?: ""
+                    val origin = data?.javaClass?.getDeclaredField("origin")?.apply { isAccessible = true }?.get(data)
+                    val author = origin?.javaClass?.getDeclaredField("author")?.apply { isAccessible = true }?.get(origin) as? String ?: ""
+                    val title = origin?.javaClass?.getDeclaredField("title")?.apply { isAccessible = true }?.get(origin) as? String ?: ""
+                    val dynasty = origin?.javaClass?.getDeclaredField("dynasty")?.apply { isAccessible = true }?.get(origin) as? String ?: ""
+                    
+                    tvHitokoto.text = content
+                    tvHitokotoFrom.text = when {
+                        title.isNotEmpty() && dynasty.isNotEmpty() -> " ——$dynasty·$author《$title》"
+                        title.isNotEmpty() -> " ——$author《$title》"
+                        author.isNotEmpty() -> " ——$author"
+                        else -> ""
+                    }
+                } else {
+                    showHitokotoError()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showHitokotoError()
             }
-            .setNegativeButton("取消", null)
-            .show()
+        }
     }
 
-    private fun updateDockApp(index: Int, appInfo: AppInfo) {
-        val currentDockApps = appRepository.getDockApps().toMutableList()
-        
-        // 确保列表足够长
-        while (currentDockApps.size <= index) {
-            currentDockApps.add(appInfo)
+    private fun startHitokotoRefreshTimer() {
+        stopHitokotoRefreshTimer()
+        hitokotoRefreshRunnable = object : Runnable {
+            override fun run() {
+                loadHitokoto()
+                handler.postDelayed(this, HITOKOTO_REFRESH_INTERVAL)
+            }
         }
-        
-        currentDockApps[index] = appInfo
-        appRepository.saveDockApps(currentDockApps)
-        loadDockApps()
+        handler.postDelayed(hitokotoRefreshRunnable!!, HITOKOTO_REFRESH_INTERVAL)
+    }
+
+    private fun stopHitokotoRefreshTimer() {
+        hitokotoRefreshRunnable?.let {
+            handler.removeCallbacks(it)
+        }
+        hitokotoRefreshRunnable = null
+    }
+
+    private fun showHitokotoError() {
+        tvHitokoto.text = "人生如戏，唯有入戏，方能始终。"
+        tvHitokotoFrom.text = " ——慕夜"
     }
 
     // ==================== 应用管理 ====================
 
     private fun refreshApps() {
-        val apps = appRepository.getInstalledApps(forceRefresh = true)
-        appGridAdapter.submitList(apps)
+        val apps = appRepository.getSortedApps()
+        val folders = appRepository.getAllFolders()
+        pageAdapter.setApps(apps, folders)
+        updatePageIndicator(0)
     }
 
-    private fun showAppOptions(appInfo: AppInfo) {
-        val options = arrayOf("打开", "卸载", "应用信息", "添加到Dock")
-        
-        AlertDialog.Builder(this)
-            .setTitle(appInfo.name)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> appRepository.launchApp(appInfo.packageName)
-                    1 -> appRepository.uninstallApp(appInfo.packageName)
-                    2 -> com.andesk.launcher.util.AppUtils.openAppSettings(this, appInfo.packageName)
-                    3 -> addToDock(appInfo)
+    private fun openFolder(folder: com.andesk.launcher.data.model.Folder) {
+        val allApps = appRepository.getInstalledApps()
+        val dialog = FolderDialog(
+            folder = folder,
+            allApps = allApps,
+            appRepository = appRepository,
+            onFolderUpdated = {
+                refreshApps()
+            }
+        )
+        dialog.show(supportFragmentManager, "folder_dialog")
+    }
+
+    private fun setupDragForCurrentPage(position: Int) {
+        val currentPage = viewPager.getChildAt(0) as? androidx.recyclerview.widget.RecyclerView ?: return
+        val viewHolder = currentPage.findViewHolderForAdapterPosition(position) as? AppPageAdapter.PageViewHolder ?: return
+        val recyclerView = viewHolder.recyclerView
+        val adapter = viewHolder.getAdapter() ?: return
+
+        val dragHelper = DragHelper(
+            adapter = adapter,
+            viewPager = viewPager,
+            onDragEnd = { fromPos, toPos ->
+                // 保存新的排序
+                pageAdapter.updatePageItems(position, adapter.getItems())
+                appRepository.saveAppOrder(pageAdapter.getAppOrder())
+            },
+            onMergeToFolder = { fromPos, toPos ->
+                // 合并到文件夹
+                val items = adapter.getItems()
+                val fromItem = items[fromPos]
+                val toItem = items[toPos]
+
+                if (fromItem is DesktopItem.App && toItem is DesktopItem.App) {
+                    // 两个应用合并为文件夹
+                    val folder = appRepository.mergeToFolder(
+                        fromItem.appInfo.packageName,
+                        toItem.appInfo.packageName
+                    )
+                    refreshApps()
+                    showToast("已创建文件夹: ${folder.name}")
+                } else if (fromItem is DesktopItem.App && toItem is DesktopItem.FolderItem) {
+                    // 应用添加到文件夹
+                    appRepository.addAppToFolder(toItem.folder.id, fromItem.appInfo.packageName)
+                    refreshApps()
+                    showToast("已添加到文件夹")
                 }
             }
-            .setNegativeButton("取消", null)
-            .show()
-    }
+        )
 
-    private fun addToDock(appInfo: AppInfo) {
-        val currentDockApps = appRepository.getDockApps().toMutableList()
-        
-        // 检查是否已存在
-        if (currentDockApps.any { it.packageName == appInfo.packageName }) {
-            Toast.makeText(this, "该应用已在Dock栏", Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        // 添加到Dock（最多5个）
-        if (currentDockApps.size < 5) {
-            currentDockApps.add(appInfo)
-            appRepository.saveDockApps(currentDockApps)
-            loadDockApps()
-            Toast.makeText(this, "已添加到Dock栏", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Dock栏已满", Toast.LENGTH_SHORT).show()
-        }
+        val itemTouchHelper = ItemTouchHelper(dragHelper)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     // ==================== 广播接收器 ====================
@@ -375,8 +713,29 @@ class HomeActivity : AppCompatActivity() {
                 addAction(Intent.ACTION_PACKAGE_REPLACED)
                 addDataScheme("package")
             }
-            registerReceiver(packageReceiver, filter)
+            registerReceiver(packageReceiver, filter, ContextCompat.RECEIVER_EXPORTED)
             isReceiverRegistered = true
+        }
+        // 注册屏幕解锁接收器
+        if (!isScreenReceiverRegistered) {
+            val screenFilter = IntentFilter().apply {
+                addAction(Intent.ACTION_USER_PRESENT)
+                addAction(Intent.ACTION_SCREEN_ON)
+            }
+            registerReceiver(screenReceiver, screenFilter, ContextCompat.RECEIVER_EXPORTED)
+            isScreenReceiverRegistered = true
+        }
+        if (!isRefreshReceiverRegistered) {
+            val refreshFilter = IntentFilter().apply {
+                addAction(PackageReceiver.ACTION_REFRESH_APPS)
+                addAction(ScreenReceiver.ACTION_SCREEN_ON)
+            }
+            registerReceiver(refreshReceiver, refreshFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
+            isRefreshReceiverRegistered = true
+        }
+        if (!isBatteryReceiverRegistered) {
+            registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            isBatteryReceiverRegistered = true
         }
     }
 
@@ -389,72 +748,87 @@ class HomeActivity : AppCompatActivity() {
             }
             isReceiverRegistered = false
         }
-    }
-
-    // ==================== 服务启动 ====================
-
-    private fun startFloatingService() {
-        if (prefsManager.floatingEnabled) {
-            if (FloatingService.isRunning) return
-            
-            val intent = Intent(this, FloatingService::class.java)
-            startForegroundService(intent)
-        }
-    }
-
-    // ==================== 权限检查 ====================
-
-    private fun checkPermissions() {
-        val permissions = mutableListOf<String>()
-        
-        // 位置权限（用于天气定位）
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) 
-            != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        
-        // 悬浮窗权限
-        if (!android.provider.Settings.canDrawOverlays(this)) {
-            // 引导用户开启悬浮窗权限
-            showOverlayPermissionDialog()
-        }
-        
-        if (permissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissions.toTypedArray(),
-                LOCATION_PERMISSION_CODE
-            )
-        }
-    }
-
-    private fun showOverlayPermissionDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("需要悬浮窗权限")
-            .setMessage("Home小圆点功能需要悬浮窗权限，请在设置中开启")
-            .setPositiveButton("去设置") { _, _ ->
-                val intent = Intent(
-                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    android.net.Uri.parse("package:$packageName")
-                )
-                startActivity(intent)
+        if (isScreenReceiverRegistered) {
+            try {
+                unregisterReceiver(screenReceiver)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            .setNegativeButton("暂不开启", null)
-            .show()
+            isScreenReceiverRegistered = false
+        }
+        if (isRefreshReceiverRegistered) {
+            try {
+                unregisterReceiver(refreshReceiver)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            isRefreshReceiverRegistered = false
+        }
+        if (isBatteryReceiverRegistered) {
+            try {
+                unregisterReceiver(batteryReceiver)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            isBatteryReceiverRegistered = false
+        }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            LOCATION_PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    loadWeather()
+    // ==================== 清理内存 ====================
+
+    private fun cleanupMemory() {
+        val mem = MemoryUtils.getMemoryInfo(this)
+        System.gc()
+        Runtime.getRuntime().gc()
+        val used = String.format("%.1fG", mem.usedMB / 1024.0)
+        val total = String.format("%.1fG", mem.totalMB / 1024.0)
+        showToast("🚀 内存: $used/$total (${mem.usagePercent}%)")
+    }
+
+    // ==================== 按键映射服务 ====================
+
+    private fun startKeyMappingService() {
+        if (prefsManager.keyMappingEnabled && !KeyMappingService.isRunning) {
+            try {
+                val intent = Intent(this, KeyMappingService::class.java)
+                startForegroundService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // ==================== 性能优化 ====================
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        when (level) {
+            TRIM_MEMORY_RUNNING_LOW,
+            TRIM_MEMORY_RUNNING_CRITICAL -> {
+                System.gc()
+            }
+        }
+    }
+
+    // ==================== Toast提示 ====================
+
+    private fun showToast(message: String) {
+        toastView.text = message
+        toastView.visibility = View.VISIBLE
+        
+        val fadeIn = ObjectAnimator.ofFloat(toastView, "alpha", 0f, 1f)
+        fadeIn.duration = 200
+        fadeIn.start()
+        
+        handler.postDelayed({
+            val fadeOut = ObjectAnimator.ofFloat(toastView, "alpha", 1f, 0f)
+            fadeOut.duration = 300
+            fadeOut.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    toastView.visibility = View.GONE
                 }
-            }
-        }
+            })
+            fadeOut.start()
+        }, 2000)
     }
 }

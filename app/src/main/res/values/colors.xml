@@ -1,30 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 主色调 -->
-    <color name="primary">#2196F3</color>
-    <color name="primary_dark">#1976D2</color>
-    <color name="primary_light">#64B5F6</color>
-    <color name="accent">#FF9800</color>
+    <!-- Glass Workspace 2.0 浅色主题 -->
+    <color name="background">#F6F8FC</color>
+    <color name="surface">#DDF7F9FC</color>
+    <color name="surface_solid">#F7F9FC</color>
+    <color name="surface_think">#EEF7F9FC</color>
+    <color name="outline">#1F6F7890</color>
     
-    <!-- 背景色 -->
-    <color name="background">#121212</color>
-    <color name="surface">#1E1E1E</color>
-    <color name="card_background">#2C2C2C</color>
+    <color name="primary">#5E5CE6</color>
+    <color name="primary_container">#1A5E5CE6</color>
+    <color name="primary_glow">#4D5E5CE6</color>
+    <color name="secondary">#30D158</color>
+    <color name="secondary_container">#1A30D158</color>
     
-    <!-- 文字颜色 -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#B0B0B0</color>
-    <color name="text_hint">#707070</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_surface">#1A1C2A</color>
+    <color name="on_surface_dim">#991A1C2A</color>
+    <color name="muted">#991A1C2A</color>
     
-    <!-- 状态颜色 -->
-    <color name="success">#4CAF50</color>
-    <color name="warning">#FF9800</color>
-    <color name="error">#F44336</color>
+    <color name="surface_variant">#EAF0F7</color>
+    <color name="surface_tint">#F0F4FA</color>
     
-    <!-- 毛玻璃效果 -->
-    <color name="glass_background">#33FFFFFF</color>
-    <color name="glass_border">#1AFFFFFF</color>
+    <color name="error">#FF453A</color>
+    <color name="error_container">#4DFF453A</color>
     
-    <!-- 分隔线 -->
-    <color name="divider">#1AFFFFFF</color>
+    <color name="clock_text">#1A1C2A</color>
+    <color name="clock_text_secondary">#991A1C2A</color>
+    
+    <color name="weather_text">#1A1C2A</color>
+    <color name="weather_text_secondary">#991A1C2A</color>
+    
+    <color name="inverse_on_surface">#F0F0F0</color>
+    
+    <color name="dock_bg">#DDF7F9FC</color>
+    <color name="dock_divider">#24708090</color>
+    
+    <color name="outline_variant">#2A8B96A8</color>
 </resources>

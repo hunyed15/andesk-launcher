@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -25,15 +24,16 @@
                 android:src="@drawable/ic_back"
                 android:scaleType="centerInside"
                 android:padding="8dp"
+                android:tint="@color/on_surface"
                 android:contentDescription="返回" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/settings"
+                android:text="桌面设置"
                 android:textSize="20sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/on_surface"
                 android:layout_marginStart="16dp" />
 
         </LinearLayout>
@@ -42,7 +42,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_clock"
+            android:text="时钟"
             android:textSize="14sp"
             android:textColor="@color/primary"
             android:paddingHorizontal="16dp"
@@ -61,9 +61,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/settings_24hour"
+                android:text="24小时制"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/on_surface" />
 
             <Switch
                 android:id="@+id/switch24Hour"
@@ -76,7 +76,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_weather"
+            android:text="天气"
             android:textSize="14sp"
             android:textColor="@color/primary"
             android:paddingHorizontal="16dp"
@@ -95,9 +95,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/settings_show_weather"
+                android:text="显示天气"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/on_surface" />
 
             <Switch
                 android:id="@+id/switchWeather"
@@ -106,16 +106,210 @@
 
         </LinearLayout>
 
-        <!-- Home小圆点设置 -->
+        <!-- 省选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="省/直辖市"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Spinner
+                android:id="@+id/spinnerProvince"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="140dp" />
+
+        </LinearLayout>
+
+        <!-- 市选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="城市"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Spinner
+                android:id="@+id/spinnerCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="120dp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnLocation"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:text="📍 自动定位获取城市"
+            android:textSize="13sp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/on_primary" />
+
+        <!-- ========== 按键映射设置 ========== -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_floating"
+            android:text="按键映射（键盘用户）"
             android:textSize="14sp"
             android:textColor="@color/primary"
             android:paddingHorizontal="16dp"
             android:paddingTop="24dp"
             android:paddingBottom="8dp" />
+
+        <!-- 按键映射开关 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="启用按键映射"
+                    android:textSize="16sp"
+                    android:textColor="@color/on_surface" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Win键单击/双击触发动作"
+                    android:textSize="12sp"
+                    android:textColor="@color/muted" />
+
+            </LinearLayout>
+
+            <Switch
+                android:id="@+id/switchKeyMapping"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <!-- 单击动作 -->
+        <LinearLayout
+            android:id="@+id/layoutSingleClick"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="单击Win键"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Spinner
+                android:id="@+id/spinnerSingleClick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="120dp" />
+
+        </LinearLayout>
+
+        <!-- 显示提示 -->
+        <LinearLayout
+            android:id="@+id/layoutShowToast"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="显示操作提示"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Switch
+                android:id="@+id/switchShowToast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <!-- 使用说明 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💡 单击Win键返回安云桌面\n适合云笔电、远程桌面等场景\n\n⚠️ 需要开启无障碍服务才能使用"
+            android:textSize="12sp"
+            android:textColor="@color/muted"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:lineSpacingExtra="4dp" />
+
+        <!-- 开启无障碍服务按钮 -->
+        <Button
+            android:id="@+id/btnAccessibility"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="开启无障碍服务"
+            android:textSize="14sp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/on_primary" />
+
+        <!-- 默认桌面按钮 + 开机自启 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="桌面"
+            android:textSize="14sp"
+            android:textColor="@color/primary"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnSetDefaultHome"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="设置为默认桌面"
+            android:textSize="14sp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/on_primary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -129,12 +323,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/settings_floating_enable"
+                android:text="开机自启"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/on_surface" />
 
             <Switch
-                android:id="@+id/switchFloating"
+                android:id="@+id/switchBootStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -144,7 +338,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_device_info"
+            android:text="设备信息"
             android:textSize="14sp"
             android:textColor="@color/primary"
             android:paddingHorizontal="16dp"
@@ -156,17 +350,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/muted"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
-            android:background="@color/surface"
+            android:background="@color/surface_variant"
             android:layout_marginHorizontal="16dp" />
 
         <!-- 关于 -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/settings_about"
+            android:text="关于"
             android:textSize="14sp"
             android:textColor="@color/primary"
             android:paddingHorizontal="16dp"
@@ -178,10 +372,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/muted"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
-            android:background="@color/surface"
+            android:background="@color/surface_variant"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="32dp" />
 

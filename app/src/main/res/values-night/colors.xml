@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Glass Workspace 2.0 深色主题 -->
+    <color name="background">#0F111A</color>
+    <color name="surface">#4C1E302F</color>
+    <color name="surface_solid">#1E2030</color>
+    <color name="surface_think">#D91E2030</color>
+    <color name="outline">#1AFFFFFF</color>
+    
+    <color name="primary">#5E5CE6</color>
+    <color name="primary_container">#1A5E5CE6</color>
+    <color name="primary_glow">#4D5E5CE6</color>
+    <color name="secondary">#30D158</color>
+    <color name="secondary_container">#1A30D158</color>
+    
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_surface">#F0F0F0</color>
+    <color name="on_surface_dim">#99F0F0F0</color>
+    <color name="muted">#99F0F0F0</color>
+    
+    <color name="surface_variant">#1AFFFFFF</color>
+    <color name="surface_tint">#1A5E5CE6</color>
+    
+    <color name="error">#FF453A</color>
+    <color name="error_container">#4DFF453A</color>
+    
+    <color name="clock_text">#F0F0F0</color>
+    <color name="clock_text_secondary">#99F0F0F0</color>
+    
+    <color name="weather_text">#F0F0F0</color>
+    <color name="weather_text_secondary">#99F0F0F0</color>
+    
+    <color name="inverse_on_surface">#F0F0F0</color>
+    
+    <color name="dock_bg">#4C1E2030</color>
+    <color name="dock_divider">#1AFFFFFF</color>
+    
+    <color name="outline_variant">#1AFFFFFF</color>
+</resources>

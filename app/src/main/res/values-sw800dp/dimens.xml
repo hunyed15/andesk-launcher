@@ -1,10 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 12寸+云笔电适配 -->
-    <dimen name="grid_column_count">6</dimen>
-    <dimen name="grid_row_count">5</dimen>
-    <dimen name="icon_size">72dp</dimen>
-    <dimen name="clock_text_size">120sp</dimen>
-    <dimen name="weather_card_width">360dp</dimen>
-    <dimen name="weather_temp_size">36sp</dimen>
+    <!-- 12寸+云笔电适配 (1.5K/2K, ~240-320dpi) -->
+    
+    <!-- 顶部栏 -->
+    <dimen name="top_bar_margin_top">28dp</dimen>
+    <dimen name="top_bar_margin_end">36dp</dimen>
+    <dimen name="top_button_size">34dp</dimen>
+    
+    <!-- 信息展示区 -->
+    <dimen name="info_section_margin_top">120dp</dimen>
+    
+    <!-- 时钟+天气 -->
+    <dimen name="clock_text_size">96sp</dimen>
+    <dimen name="weather_icon_size">96sp</dimen>
+    <dimen name="weather_temp_size">22sp</dimen>
+    <dimen name="weather_city_size">16sp</dimen>
+    <dimen name="date_text_size">16sp</dimen>
+    <dimen name="date2_text_size">14sp</dimen>
+    
+    <!-- 一言 -->
+    <dimen name="hitokoto_text_size">21sp</dimen>
+    <dimen name="hitokoto_from_size">15sp</dimen>
+    <dimen name="hitokoto_max_width">500dp</dimen>
+    <dimen name="hitokoto_refresh_size">36dp</dimen>
+    
+    <!-- 应用网格 -->
+    <dimen name="app_icon_size">72dp</dimen>
+    <dimen name="app_icon_padding">16dp</dimen>
+    <dimen name="app_icon_corner">18dp</dimen>
+    <dimen name="app_label_size">14sp</dimen>
+    <dimen name="app_grid_gap">32dp</dimen>
+    
+    <!-- 页码指示器 -->
+    <dimen name="page_indicator_size">32dp</dimen>
+    <dimen name="page_indicator_text_size">12sp</dimen>
+    
+    <!-- Dock栏 -->
+    <dimen name="dock_margin_bottom">24dp</dimen>
+    <dimen name="dock_corner">28dp</dimen>
+    <dimen name="dock_height">60dp</dimen>
+    <dimen name="dock_icon_size">48dp</dimen>
+    <dimen name="dock_padding_h">28dp</dimen>
+    <dimen name="dock_icon_spacing">14dp</dimen>
 </resources>

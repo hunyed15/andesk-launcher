@@ -3,106 +3,114 @@ package com.andesk.launcher.data.repository
 import android.util.Log
 import com.andesk.launcher.data.local.PrefsManager
 import com.andesk.launcher.data.model.WeatherInfo
-import com.andesk.launcher.data.remote.QWeatherClient
+import com.andesk.launcher.data.remote.AmapWeatherApi
+import com.andesk.launcher.data.remote.AmapForecastCast
 import com.google.gson.Gson
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 class WeatherRepository(private val prefsManager: PrefsManager) {
 
     companion object {
-        private const val TAG = "WeatherRepository"
+        private const val TAG = "WeatherRepo"
+        // QWeather图标CDN
+        private fun iconUrl(code: String) = "https://a.hecdn.net/img/common/icon/202106d/$code.png"
     }
 
     private val gson = Gson()
 
-    /**
-     * 获取天气信息（优先缓存）
-     */
+    private val api: AmapWeatherApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(AmapWeatherApi.BASE_URL)
+            .client(OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .build())
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AmapWeatherApi::class.java)
+    }
+
     suspend fun getWeather(): WeatherInfo? {
-        // 先检查缓存
         if (prefsManager.isWeatherCacheValid()) {
-            val cached = prefsManager.getWeatherCache()
-            if (cached != null) {
-                return try {
-                    gson.fromJson(cached, WeatherInfo::class.java)
-                } catch (e: Exception) {
-                    null
-                }
+            prefsManager.getWeatherCache()?.let {
+                return try { gson.fromJson(it, WeatherInfo::class.java) } catch (_: Exception) { null }
             }
         }
-
-        // 缓存过期或不存在，请求API
-        return fetchWeatherFromApi()
+        return fetchFromApi()
     }
 
-    /**
-     * 从API获取天气
-     */
-    private suspend fun fetchWeatherFromApi(): WeatherInfo? {
+    private suspend fun fetchFromApi(): WeatherInfo? {
+        val adcode = prefsManager.weatherCityId
+        Log.d(TAG, "请求天气: ${prefsManager.weatherCity} ($adcode)")
+
         return try {
-            val cityId = prefsManager.weatherCityId
-            val response = QWeatherClient.api.getWeatherNow(cityId)
-
-            if (response.code == "200" && response.now != null) {
-                val weatherInfo = WeatherInfo(
-                    city = prefsManager.weatherCity,
-                    temp = response.now.temp.toIntOrNull() ?: 0,
-                    text = response.now.text,
-                    icon = response.now.icon,
-                    humidity = response.now.humidity.toIntOrNull() ?: 0,
-                    windDir = response.now.windDir,
-                    windScale = response.now.windScale
-                )
-
-                // 保存到缓存
-                prefsManager.saveWeatherCache(gson.toJson(weatherInfo))
-
-                weatherInfo
-            } else {
-                Log.e(TAG, "Weather API error: ${response.code}")
-                getCachedWeather()
+            val (liveResp, forecastResp) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val live = api.getWeather(adcode, ext = "base").execute()
+                val forecast = api.getWeather(adcode, ext = "all").execute()
+                live to forecast
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetch weather", e)
-            getCachedWeather()
-        }
-    }
-
-    /**
-     * 获取缓存的天气（即使过期）
-     */
-    private fun getCachedWeather(): WeatherInfo? {
-        val cached = prefsManager.getWeatherCache()
-        return if (cached != null) {
-            try {
-                gson.fromJson(cached, WeatherInfo::class.java)
-            } catch (e: Exception) {
+            if (!liveResp.isSuccessful || liveResp.body()?.status != "1") {
+                Log.e(TAG, "实况天气API失败: ${liveResp.code()}")
+                return getCached()
+            }
+            val live = liveResp.body()?.lives?.firstOrNull() ?: return getCached()
+            val todayForecast = if (forecastResp.isSuccessful && forecastResp.body()?.status == "1") {
+                forecastResp.body()?.forecasts?.firstOrNull()?.casts?.firstOrNull()
+            } else {
+                Log.w(TAG, "预报天气API失败: ${forecastResp.code()}")
                 null
             }
-        } else null
-    }
 
-    /**
-     * 搜索城市
-     */
-    suspend fun searchCity(query: String): List<com.andesk.launcher.data.remote.CityLocation> {
-        return try {
-            val response = QWeatherClient.api.searchCity(query)
-            if (response.code == "200") {
-                response.location ?: emptyList()
-            } else {
-                emptyList()
-            }
+            val currentTemp = live.temperature.toIntOrNull() ?: 0
+            val tempRange = resolveTempRange(todayForecast, currentTemp)
+
+            val info = WeatherInfo(
+                city = live.city,
+                temp = currentTemp,
+                tempMax = tempRange.second,
+                tempMin = tempRange.first,
+                text = live.weather,
+                icon = mapIcon(live.weather),
+                humidity = live.humidity.toIntOrNull() ?: 0,
+                windDir = live.winddirection,
+                windScale = "${live.windpower}级"
+            )
+
+            prefsManager.saveWeatherCache(gson.toJson(info))
+            Log.d(TAG, "天气: ${info.temp}° ${info.tempRangeDisplay} ${info.text}, 实况=${live.reporttime}, 预报=${todayForecast?.date ?: "无"}")
+            info
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to search city", e)
-            emptyList()
+            Log.e(TAG, "天气请求失败", e)
+            getCached()
         }
     }
 
-    /**
-     * 更新城市设置
-     */
-    fun updateCity(cityName: String, cityId: String) {
-        prefsManager.weatherCity = cityName
-        prefsManager.weatherCityId = cityId
+    private fun resolveTempRange(cast: AmapForecastCast?, currentTemp: Int): Pair<Int, Int> {
+        val dayTemp = cast?.daytemp?.toIntOrNull()
+        val nightTemp = cast?.nighttemp?.toIntOrNull()
+        if (dayTemp != null && nightTemp != null) {
+            return minOf(nightTemp, dayTemp) to maxOf(nightTemp, dayTemp)
+        }
+        return (currentTemp - 3) to currentTemp
+    }
+
+    private fun mapIcon(text: String): String = when {
+        text.contains("晴") -> "100"
+        text.contains("云") -> "101"
+        text.contains("阴") -> "104"
+        text.contains("雨") -> "305"
+        text.contains("雪") -> "400"
+        text.contains("雾") || text.contains("霾") -> "501"
+        text.contains("风") -> "200"
+        else -> "100"
+    }
+
+    private fun getCached(): WeatherInfo? {
+        return prefsManager.getWeatherCache()?.let {
+            try { gson.fromJson(it, WeatherInfo::class.java) } catch (_: Exception) { null }
+        }
     }
 }

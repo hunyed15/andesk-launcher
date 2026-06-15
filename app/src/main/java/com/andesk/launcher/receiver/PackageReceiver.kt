@@ -12,7 +12,7 @@ class PackageReceiver : BroadcastReceiver() {
             Intent.ACTION_PACKAGE_REMOVED,
             Intent.ACTION_PACKAGE_REPLACED -> {
                 // 应用安装/卸载时，发送广播通知桌面刷新
-                val refreshIntent = Intent(ACTION_REFRESH_APPS)
+                val refreshIntent = Intent(ACTION_REFRESH_APPS).setPackage(context.packageName)
                 context.sendBroadcast(refreshIntent)
             }
         }

@@ -1,42 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 应用网格 -->
-    <dimen name="grid_column_count">4</dimen>
-    <dimen name="grid_row_count">5</dimen>
-    <dimen name="icon_size">56dp</dimen>
-    <dimen name="icon_text_size">12sp</dimen>
-    <dimen name="grid_padding">24dp</dimen>
-    <dimen name="grid_item_spacing">12dp</dimen>
+    <!-- ==================== 顶部栏 ==================== -->
+    <dimen name="top_bar_margin_top">20dp</dimen>
+    <dimen name="top_bar_margin_end">28dp</dimen>
+    <dimen name="top_button_size">22dp</dimen>
+    <dimen name="top_button_spacing">14dp</dimen>
     
-    <!-- 时钟 -->
-    <dimen name="clock_text_size">96sp</dimen>
-    <dimen name="date_text_size">18sp</dimen>
+    <!-- ==================== 信息展示区 ==================== -->
+    <dimen name="info_section_margin_top">80dp</dimen>
     
-    <!-- 天气卡片 -->
-    <dimen name="weather_card_width">280dp</dimen>
-    <dimen name="weather_card_height">120dp</dimen>
-    <dimen name="weather_temp_size">32sp</dimen>
-    <dimen name="weather_icon_size">48dp</dimen>
+    <!-- 时钟+天气组件 -->
+    <dimen name="clock_text_size">68sp</dimen>
+    <dimen name="clock_weather_spacing">12dp</dimen>
+    <dimen name="weather_icon_size">68sp</dimen>
+    <dimen name="weather_temp_size">18sp</dimen>
+    <dimen name="weather_city_size">14sp</dimen>
+    <dimen name="date_text_size">14sp</dimen>
+    <dimen name="date2_text_size">12sp</dimen>
+    <dimen name="date_time_spacing">8dp</dimen>
+    <dimen name="date_row_spacing">2dp</dimen>
     
-    <!-- Dock栏 -->
-    <dimen name="dock_height">72dp</dimen>
-    <dimen name="dock_icon_size">48dp</dimen>
-    <dimen name="dock_padding">24dp</dimen>
+    <!-- 一言组件 -->
+    <dimen name="hitokoto_text_size">17sp</dimen>
+    <dimen name="hitokoto_from_size">13sp</dimen>
+    <dimen name="hitokoto_from_spacing">4dp</dimen>
+    <dimen name="hitokoto_padding">20dp</dimen>
+    <dimen name="hitokoto_refresh_size">18dp</dimen>
+    <dimen name="hitokoto_refresh_margin">8dp</dimen>
+    <dimen name="hitokoto_max_width">340dp</dimen>
     
-    <!-- Home小圆点 -->
-    <dimen name="floating_size">48dp</dimen>
-    <dimen name="floating_icon_size">24dp</dimen>
+    <!-- ==================== 应用网格 ==================== -->
+    <dimen name="app_icon_size">56dp</dimen>
+    <dimen name="app_grid_margin_top">100dp</dimen>
+    <dimen name="app_icon_padding">12dp</dimen>
+    <dimen name="app_icon_corner">16dp</dimen>
+    <dimen name="app_label_size">12sp</dimen>
+    <dimen name="app_grid_gap">24dp</dimen>
+    <dimen name="app_grid_columns">5</dimen>
     
-    <!-- 圆角 -->
-    <dimen name="corner_radius_small">8dp</dimen>
-    <dimen name="corner_radius_medium">12dp</dimen>
-    <dimen name="corner_radius_large">16dp</dimen>
-    <dimen name="corner_radius_xlarge">20dp</dimen>
+    <!-- ==================== 页码指示器 ==================== -->
+    <dimen name="page_indicator_size">24dp</dimen>
+    <dimen name="page_indicator_text_size">10sp</dimen>
+    <dimen name="page_indicator_spacing">8dp</dimen>
     
-    <!-- 间距 -->
-    <dimen name="spacing_xs">4dp</dimen>
-    <dimen name="spacing_small">8dp</dimen>
-    <dimen name="spacing_medium">16dp</dimen>
-    <dimen name="spacing_large">24dp</dimen>
-    <dimen name="spacing_xl">32dp</dimen>
+    <!-- ==================== Dock栏 ==================== -->
+    <dimen name="dock_margin_bottom">16dp</dimen>
+    <dimen name="dock_corner">24dp</dimen>
+    <dimen name="dock_elevation">8dp</dimen>
+    <dimen name="dock_padding_h">20dp</dimen>
+    <dimen name="dock_padding_v">8dp</dimen>
+    <dimen name="dock_height">56dp</dimen>
+    <dimen name="dock_icon_size">40dp</dimen>
+    <dimen name="dock_icon_spacing">12dp</dimen>
+    <dimen name="dock_divider_height">40dp</dimen>
+    <dimen name="dock_divider_margin">12dp</dimen>
+    
+    <!-- ==================== 间距规范 ==================== -->
+    <dimen name="spacing_xs">2dp</dimen>
+    <dimen name="spacing_sm">4dp</dimen>
+    <dimen name="spacing_md">8dp</dimen>
+    <dimen name="spacing_lg">12dp</dimen>
+    <dimen name="spacing_xl">16dp</dimen>
+    <dimen name="spacing_xxl">20dp</dimen>
+    <dimen name="spacing_xxxl">24dp</dimen>
+    
+    <!-- ==================== 圆角规范 ==================== -->
+    <dimen name="radius_xs">4dp</dimen>
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_xl">20dp</dimen>
+    <dimen name="radius_xxl">24dp</dimen>
+    
+    <!-- ==================== 字体大小 ==================== -->
+    <dimen name="text_xs">10sp</dimen>
+    <dimen name="text_sm">11sp</dimen>
+    <dimen name="text_md">12sp</dimen>
+    <dimen name="text_lg">13sp</dimen>
+    <dimen name="text_xl">14sp</dimen>
+    <dimen name="text_xxl">16sp</dimen>
+    <dimen name="text_xxxl">17sp</dimen>
+    <dimen name="text_display">68sp</dimen>
 </resources>
