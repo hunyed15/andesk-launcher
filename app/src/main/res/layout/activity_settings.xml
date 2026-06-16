@@ -202,7 +202,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Win键单击/双击触发动作"
+                    android:text="Win键单击返回桌面，组合键保留给系统"
                     android:textSize="12sp"
                     android:textColor="@color/muted" />
 
@@ -270,7 +270,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="💡 单击Win键返回安云桌面\n适合云笔电、远程桌面等场景\n\n⚠️ 需要开启无障碍服务才能使用"
+            android:text="单击Win键返回安云桌面；Win组合键和双击会保留给系统\n\n需要开启无障碍服务才能使用"
             android:textSize="12sp"
             android:textColor="@color/muted"
             android:paddingHorizontal="16dp"

@@ -29,6 +29,7 @@ import com.andesk.launcher.data.repository.AppRepository
 import com.andesk.launcher.data.repository.WeatherRepository
 import com.andesk.launcher.receiver.PackageReceiver
 import com.andesk.launcher.receiver.ScreenReceiver
+import com.andesk.launcher.service.KeyMappingAccessibilityService
 import com.andesk.launcher.ui.appdrawer.AppDrawerActivity
 import com.andesk.launcher.ui.settings.SettingsActivity
 import com.andesk.launcher.service.KeyMappingService
@@ -469,6 +470,13 @@ class HomeActivity : AppCompatActivity() {
             findViewById<ImageView>(R.id.btnThemeToggle)?.setImageResource(
                 if (isDark) R.drawable.ic_theme_dark else R.drawable.ic_theme_light
             )
+        }
+
+        // 电源菜单
+        findViewById<View>(R.id.btnPowerMenu)?.setOnClickListener {
+            if (!KeyMappingAccessibilityService.showPowerDialog()) {
+                showToast("请开启无障碍服务后使用电源菜单")
+            }
         }
 
         // 一言刷新按钮

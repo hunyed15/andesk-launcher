@@ -96,7 +96,15 @@
             android:layout_width="32dp" android:layout_height="32dp"
             android:src="@drawable/ic_theme_dark" android:scaleType="centerInside"
             android:padding="6dp" android:tint="@color/muted"
-            android:contentDescription="切换主题" />
+            android:contentDescription="切换主题"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 电源菜单 -->
+        <ImageView android:id="@+id/btnPowerMenu"
+            android:layout_width="32dp" android:layout_height="32dp"
+            android:src="@drawable/ic_power" android:scaleType="centerInside"
+            android:padding="6dp" android:tint="@color/muted"
+            android:contentDescription="电源菜单" />
 
     </LinearLayout>
 
