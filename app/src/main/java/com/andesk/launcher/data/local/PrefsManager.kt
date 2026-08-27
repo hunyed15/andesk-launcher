@@ -29,6 +29,9 @@ class PrefsManager(context: Context) {
         
         // 主题设置
         private const val KEY_THEME_MODE = "theme_mode" // light, dark
+
+        // 桌面布局
+        private const val KEY_LAYOUT_MODE = "layout_mode" // classic, deepin
         
         // 按键映射设置
         private const val KEY_MAPPING_ENABLED = "key_mapping_enabled"
@@ -49,6 +52,13 @@ class PrefsManager(context: Context) {
     var themeMode: String
         get() = prefs.getString(KEY_THEME_MODE, "light") ?: "light"
         set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
+
+    // ==================== 桌面布局 ====================
+
+    /** 桌面布局模式：classic（经典） / deepin（Deepin Dock 风格） */
+    var layoutMode: String
+        get() = prefs.getString(KEY_LAYOUT_MODE, "classic") ?: "classic"
+        set(value) = prefs.edit().putString(KEY_LAYOUT_MODE, value).apply()
 
     // ==================== 按键映射设置 ====================
 

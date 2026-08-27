@@ -355,6 +355,31 @@
             android:paddingTop="24dp"
             android:paddingBottom="8dp" />
 
+        <!-- 桌面布局 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="桌面布局"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Spinner
+                android:id="@+id/spinnerLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="140dp" />
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnSetDefaultHome"
             style="@style/ButtonStyle.Outlined"

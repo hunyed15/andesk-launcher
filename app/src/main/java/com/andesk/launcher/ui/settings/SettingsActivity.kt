@@ -175,6 +175,9 @@ class SettingsActivity : AppCompatActivity() {
             openAccessibilitySettings()
         }
 
+        // 桌面布局选择
+        setupLayoutSpinner()
+
         // 设置为默认桌面
         findViewById<View>(R.id.btnSetDefaultHome)?.setOnClickListener {
             val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
@@ -250,6 +253,28 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateKeyMappingHint() {
         val hint = findViewById<TextView>(R.id.tvKeyMappingHint)
         hint?.text = "当前单击 ${KeyMappingKeys.labelFor(prefsManager.keyMappingKeyCode)} 返回桌面"
+    }
+
+    private fun setupLayoutSpinner() {
+        val spinner = findViewById<Spinner>(R.id.spinnerLayout) ?: return
+
+        val options = arrayOf("经典（侧边卡片）", "Deepin Dock 风格")
+        val values = arrayOf("classic", "deepin")
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        val current = prefsManager.layoutMode
+        val idx = values.indexOf(current)
+        if (idx >= 0) spinner.setSelection(idx)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                prefsManager.layoutMode = values[position]
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun setupSingleClickSpinner() {

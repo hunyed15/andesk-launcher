@@ -113,6 +113,9 @@ class HomeActivity : AppCompatActivity() {
     
     // 编辑模式
     private var isEditMode = false
+
+    // 当前布局模式（用于检测设置页切换后重建）
+    private var currentLayoutMode = TYPE_CLASSIC
     
     // Toast Handler
     private val handler = Handler(Looper.getMainLooper())
@@ -123,6 +126,8 @@ class HomeActivity : AppCompatActivity() {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
+        private const val TYPE_CLASSIC = "classic"
+        private const val TYPE_DEEPIN = "deepin"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,10 +136,11 @@ class HomeActivity : AppCompatActivity() {
         // 全屏模式
         setupFullScreen()
         
-        setContentView(R.layout.activity_home)
-        
-        // 初始化
+        // 初始化（需先读取布局模式以选择布局）
         prefsManager = PrefsManager(this)
+        currentLayoutMode = prefsManager.layoutMode
+        setContentView(chooseLayoutRes(currentLayoutMode))
+        
         appRepository = AppRepository(this, prefsManager)
         weatherRepository = WeatherRepository(prefsManager)
         
@@ -159,6 +165,12 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // 若在设置页切换了布局，则重建以应用新布局
+        if (prefsManager.layoutMode != currentLayoutMode) {
+            currentLayoutMode = prefsManager.layoutMode
+            recreate()
+            return
+        }
         refreshApps()
         loadDockApps()
         loadWeather()
@@ -177,6 +189,11 @@ class HomeActivity : AppCompatActivity() {
         unregisterPackageReceiver()
         stopHitokotoRefreshTimer()
         handler.removeCallbacksAndMessages(null)
+    }
+
+    private fun chooseLayoutRes(mode: String): Int = when (mode) {
+        TYPE_DEEPIN -> R.layout.activity_home_deepin
+        else -> R.layout.activity_home
     }
 
     private fun setupFullScreen() {
