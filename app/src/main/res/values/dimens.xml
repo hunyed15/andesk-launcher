@@ -5,6 +5,27 @@
     <dimen name="top_bar_margin_end">28dp</dimen>
     <dimen name="top_button_size">22dp</dimen>
     <dimen name="top_button_spacing">14dp</dimen>
+
+    <!-- ===== 顶部控制区（含触控目标） ===== -->
+    <dimen name="top_bar_height">48dp</dimen>
+    <dimen name="top_bar_margin">24dp</dimen>
+    <dimen name="top_control_size">40dp</dimen>
+    <dimen name="top_control_padding">8dp</dimen>
+    <dimen name="top_control_spacing">8dp</dimen>
+    <dimen name="top_separator_height">20dp</dimen>
+
+    <!-- ==================== 首页主布局 ==================== -->
+    <dimen name="home_margin_top">80dp</dimen>
+    <dimen name="home_margin_bottom">100dp</dimen>
+    <dimen name="home_margin_sides">40dp</dimen>
+    <dimen name="home_sidebar_gap">20dp</dimen>
+    <dimen name="home_card_padding">20dp</dimen>
+    <dimen name="home_card_gap">24dp</dimen>
+    <dimen name="dock_bar_margin_bottom">24dp</dimen>
+
+    <!-- ==================== 应用抽屉面板 ==================== -->
+    <dimen name="drawer_margin_sides">80dp</dimen>
+    <dimen name="drawer_margin_vertical">60dp</dimen>
     
     <!-- ==================== 信息展示区 ==================== -->
     <dimen name="info_section_margin_top">80dp</dimen>
@@ -34,7 +55,7 @@
     <dimen name="app_grid_margin_top">100dp</dimen>
     <dimen name="app_icon_padding">12dp</dimen>
     <dimen name="app_icon_corner">16dp</dimen>
-    <dimen name="app_label_size">12sp</dimen>
+    <dimen name="app_label_size">13sp</dimen>
     <dimen name="app_grid_gap">24dp</dimen>
     <dimen name="app_grid_columns">5</dimen>
     

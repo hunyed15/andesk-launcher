@@ -17,7 +17,7 @@
             android:id="@+id/cardFolder"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            app:cardBackgroundColor="@color/surface_variant"
+            app:cardBackgroundColor="@color/surface_tint"
             app:cardCornerRadius="@dimen/app_icon_corner"
             app:cardElevation="0dp"
             app:strokeColor="@color/outline_variant"

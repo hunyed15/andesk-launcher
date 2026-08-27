@@ -4,21 +4,28 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
 import com.andesk.launcher.data.local.PrefsManager
 import com.andesk.launcher.ui.home.HomeActivity
+import com.andesk.launcher.util.KeyMappingKeys
 
 class KeyMappingAccessibilityService : AccessibilityService() {
 
     companion object {
-        private const val TAG = "KeyMapping"
         private const val DOUBLE_CLICK_WINDOW_MS = 360L
         private const val LONG_PRESS_WINDOW_MS = 650L
+
+        /** 自定义按键录制完成后发出的广播（携带键码 keyCode） */
+        const val ACTION_KEY_CAPTURED = "com.andesk.launcher.action.KEY_CAPTURED"
+
         var isRunning = false
             private set
+
+        /** 是否处于"自定义按键录制"等待状态（内存态，设置页控制） */
+        @Volatile
+        var capturePending = false
 
         private var instance: KeyMappingAccessibilityService? = null
 
@@ -29,12 +36,14 @@ class KeyMappingAccessibilityService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var prefs: PrefsManager
-    private var winDownKeyCode = KeyEvent.KEYCODE_UNKNOWN
-    private var winDownTime = 0L
-    private var lastWinUpTime = 0L
-    private var winComboDetected = false
-    private var ignoreCurrentWinPress = false
-    private var pendingWinOpen: Runnable? = null
+
+    // 触发键状态（原为 Win 键，现为可配置触发键）
+    private var triggerDownKeyCode = KeyEvent.KEYCODE_UNKNOWN
+    private var triggerDownTime = 0L
+    private var lastTriggerUpTime = 0L
+    private var comboDetected = false
+    private var ignoreCurrentTriggerPress = false
+    private var pendingTriggerOpen: Runnable? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -49,18 +58,52 @@ class KeyMappingAccessibilityService : AccessibilityService() {
 
     override fun onKeyEvent(event: KeyEvent): Boolean {
         if (!::prefs.isInitialized) prefs = PrefsManager(this)
+
+        // 自定义按键录制优先
+        if (capturePending) {
+            return handleCapture(event)
+        }
+
         if (!prefs.keyMappingEnabled || prefs.keyMappingSingleClick != "home") return false
 
-        return handleWinKey(event)
+        return handleTriggerKey(event)
     }
 
-    private fun handleWinKey(event: KeyEvent): Boolean {
-        val isWinKey = event.keyCode == KeyEvent.KEYCODE_META_LEFT ||
-            event.keyCode == KeyEvent.KEYCODE_META_RIGHT
+    /**
+     * 录制模式：捕获下一个非修饰键作为触发键。Esc 取消。
+     * 在按下（DOWN）时捕获并消费事件，避免默认行为（如 Back 返回）干扰。
+     */
+    private fun handleCapture(event: KeyEvent): Boolean {
+        // 修饰键不采集（Win/Shift/Ctrl/Alt 等）
+        if (KeyMappingKeys.isModifier(event.keyCode)) return false
 
-        if (!isWinKey) {
-            if (winDownKeyCode != KeyEvent.KEYCODE_UNKNOWN && event.action == KeyEvent.ACTION_DOWN) {
-                winComboDetected = true
+        // Esc 取消录制
+        if (event.keyCode == KeyEvent.KEYCODE_ESCAPE) {
+            if (event.action == KeyEvent.ACTION_UP) {
+                capturePending = false
+                toast("已取消自定义按键")
+            }
+            return false
+        }
+
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            capturePending = false
+            prefs.keyMappingKeyCode = event.keyCode
+            toast("已设置按键: " + KeyMappingKeys.labelFor(event.keyCode))
+            // 通知设置页刷新（自定义按键可能不在预置列表）
+            sendBroadcast(Intent(ACTION_KEY_CAPTURED).setPackage(packageName).putExtra("keyCode", event.keyCode))
+            return true
+        }
+
+        return false
+    }
+
+    private fun handleTriggerKey(event: KeyEvent): Boolean {
+        val isTrigger = KeyMappingKeys.matches(prefs.keyMappingKeyCode, event.keyCode)
+
+        if (!isTrigger) {
+            if (triggerDownKeyCode != KeyEvent.KEYCODE_UNKNOWN && event.action == KeyEvent.ACTION_DOWN) {
+                comboDetected = true
             }
             return false
         }
@@ -68,36 +111,36 @@ class KeyMappingAccessibilityService : AccessibilityService() {
         when (event.action) {
             KeyEvent.ACTION_DOWN -> {
                 if (event.repeatCount > 0) {
-                    winComboDetected = true
+                    comboDetected = true
                     return false
                 }
 
-                if (pendingWinOpen != null && event.eventTime - lastWinUpTime < DOUBLE_CLICK_WINDOW_MS) {
-                    cancelPendingWinOpen()
-                    ignoreCurrentWinPress = true
-                    winComboDetected = true
+                if (pendingTriggerOpen != null && event.eventTime - lastTriggerUpTime < DOUBLE_CLICK_WINDOW_MS) {
+                    cancelPendingTriggerOpen()
+                    ignoreCurrentTriggerPress = true
+                    comboDetected = true
                 } else {
-                    ignoreCurrentWinPress = false
-                    winComboDetected = false
+                    ignoreCurrentTriggerPress = false
+                    comboDetected = false
                 }
 
-                winDownKeyCode = event.keyCode
-                winDownTime = event.downTime
+                triggerDownKeyCode = event.keyCode
+                triggerDownTime = event.downTime
             }
             KeyEvent.ACTION_UP -> {
-                if (winDownKeyCode != event.keyCode) return false
+                if (triggerDownKeyCode != event.keyCode) return false
 
-                val pressDuration = event.eventTime - winDownTime
-                val shouldOpen = !ignoreCurrentWinPress &&
-                    !winComboDetected &&
+                val pressDuration = event.eventTime - triggerDownTime
+                val shouldOpen = !ignoreCurrentTriggerPress &&
+                    !comboDetected &&
                     pressDuration < LONG_PRESS_WINDOW_MS
 
-                winDownKeyCode = KeyEvent.KEYCODE_UNKNOWN
-                winDownTime = 0L
-                lastWinUpTime = event.eventTime
+                triggerDownKeyCode = KeyEvent.KEYCODE_UNKNOWN
+                triggerDownTime = 0L
+                lastTriggerUpTime = event.eventTime
 
                 if (shouldOpen) {
-                    scheduleWinOpen()
+                    scheduleTriggerOpen()
                 }
             }
         }
@@ -105,18 +148,18 @@ class KeyMappingAccessibilityService : AccessibilityService() {
         return false
     }
 
-    private fun scheduleWinOpen() {
-        cancelPendingWinOpen()
-        pendingWinOpen = Runnable {
-            pendingWinOpen = null
+    private fun scheduleTriggerOpen() {
+        cancelPendingTriggerOpen()
+        pendingTriggerOpen = Runnable {
+            pendingTriggerOpen = null
             openAnDesk()
         }
-        handler.postDelayed(pendingWinOpen!!, DOUBLE_CLICK_WINDOW_MS)
+        handler.postDelayed(pendingTriggerOpen!!, DOUBLE_CLICK_WINDOW_MS)
     }
 
-    private fun cancelPendingWinOpen() {
-        pendingWinOpen?.let { handler.removeCallbacks(it) }
-        pendingWinOpen = null
+    private fun cancelPendingTriggerOpen() {
+        pendingTriggerOpen?.let { handler.removeCallbacks(it) }
+        pendingTriggerOpen = null
     }
 
     private fun openAnDesk() {
@@ -132,7 +175,7 @@ class KeyMappingAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        cancelPendingWinOpen()
+        cancelPendingTriggerOpen()
         if (instance === this) instance = null
         isRunning = false
     }

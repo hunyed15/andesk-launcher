@@ -1,9 +1,12 @@
 package com.andesk.launcher.ui.appdrawer
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.WindowManager
-import android.widget.SearchView
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +21,7 @@ class AppDrawerActivity : AppCompatActivity() {
     private lateinit var appRepository: AppRepository
     private lateinit var adapter: AppDrawerAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var searchView: SearchView
+    private lateinit var searchInput: EditText
 
     private var allApps: List<AppInfo> = emptyList()
 
@@ -36,8 +39,11 @@ class AppDrawerActivity : AppCompatActivity() {
         
         // 搜索胶囊打开时自动聚焦搜索框
         if (intent.getBooleanExtra("openSearch", false)) {
-            searchView.requestFocus()
-            searchView.isIconified = false
+            searchInput.requestFocus()
+            searchInput.postDelayed({
+                getSystemService(InputMethodManager::class.java)
+                    .showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT)
+            }, 150)
         }
     }
 
@@ -58,24 +64,20 @@ class AppDrawerActivity : AppCompatActivity() {
 
     private fun initViews() {
         recyclerView = findViewById(R.id.rvAllApps)
-        searchView = findViewById(R.id.searchView)
+        searchInput = findViewById(R.id.searchInput)
 
         // 返回按钮
         findViewById<View>(R.id.btnBack)?.setOnClickListener {
             finish()
         }
 
-        // 搜索
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                filterApps(query)
-                return true
+        // 实时过滤搜索
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filterApps(s?.toString())
             }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                filterApps(newText)
-                return true
-            }
+            override fun afterTextChanged(s: Editable?) {}
         })
     }
 

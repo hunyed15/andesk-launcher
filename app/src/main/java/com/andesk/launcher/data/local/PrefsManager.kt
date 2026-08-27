@@ -2,6 +2,7 @@ package com.andesk.launcher.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.KeyEvent
 import com.google.gson.Gson
 
 class PrefsManager(context: Context) {
@@ -33,6 +34,7 @@ class PrefsManager(context: Context) {
         private const val KEY_MAPPING_ENABLED = "key_mapping_enabled"
         private const val KEY_MAPPING_SINGLE_CLICK = "key_mapping_single_click" // home, none
         private const val KEY_MAPPING_SHOW_TOAST = "key_mapping_show_toast"
+        private const val KEY_MAPPING_KEYCODE = "key_mapping_keycode" // 触发键键码
         
         // 其他
         private const val KEY_FIRST_LAUNCH = "first_launch"
@@ -61,6 +63,11 @@ class PrefsManager(context: Context) {
     var keyMappingShowToast: Boolean
         get() = prefs.getBoolean(KEY_MAPPING_SHOW_TOAST, true)
         set(value) = prefs.edit().putBoolean(KEY_MAPPING_SHOW_TOAST, value).apply()
+
+    /** 触发键键码，默认 Win 键（左右 Meta 都算） */
+    var keyMappingKeyCode: Int
+        get() = prefs.getInt(KEY_MAPPING_KEYCODE, KeyEvent.KEYCODE_META_LEFT)
+        set(value) = prefs.edit().putInt(KEY_MAPPING_KEYCODE, value).apply()
 
     var is24HourFormat: Boolean
         get() = prefs.getBoolean(KEY_CLOCK_FORMAT_24H, true)

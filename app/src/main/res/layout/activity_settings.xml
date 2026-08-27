@@ -157,14 +157,13 @@
 
         <Button
             android:id="@+id/btnLocation"
+            style="@style/ButtonStyle.Outlined"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="4dp"
             android:text="📍 自动定位获取城市"
-            android:textSize="13sp"
-            android:backgroundTint="@color/primary"
-            android:textColor="@color/on_primary" />
+            android:textSize="13sp" />
 
         <!-- ========== 按键映射设置 ========== -->
         <TextView
@@ -202,7 +201,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Win键单击返回桌面，组合键保留给系统"
+                    android:text="单击触发键返回桌面，组合键保留给系统"
                     android:textSize="12sp"
                     android:textColor="@color/muted" />
 
@@ -212,6 +211,63 @@
                 android:id="@+id/switchKeyMapping"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <!-- 触发按键 -->
+        <LinearLayout
+            android:id="@+id/layoutTriggerKey"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="触发按键"
+                android:textSize="16sp"
+                android:textColor="@color/on_surface" />
+
+            <Spinner
+                android:id="@+id/spinnerTriggerKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="120dp" />
+
+        </LinearLayout>
+
+        <!-- 自定义按键（录制） -->
+        <LinearLayout
+            android:id="@+id/layoutRecordKey"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/tvKeyMappingHint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="单击触发键返回桌面"
+                android:textSize="14sp"
+                android:textColor="@color/muted" />
+
+            <Button
+                android:id="@+id/btnRecordCustomKey"
+                style="@style/ButtonStyle.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:text="自定义按键"
+                android:textSize="13sp" />
 
         </LinearLayout>
 
@@ -229,7 +285,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="单击Win键"
+                android:text="单击动作"
                 android:textSize="16sp"
                 android:textColor="@color/on_surface" />
 
@@ -270,24 +326,23 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="单击Win键返回安云桌面；Win组合键和双击会保留给系统\n\n需要开启无障碍服务才能使用"
+            android:text="单击触发键返回安云桌面；组合键和双击会保留给系统\n\n可在上方选择预置按键，或点击“自定义按键”按下任意键\n\n需要开启无障碍服务才能使用"
             android:textSize="12sp"
             android:textColor="@color/muted"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
             android:lineSpacingExtra="4dp" />
 
-        <!-- 开启无障碍服务按钮 -->
+        <!-- 开启无障碍服务按钮（主操作） -->
         <Button
             android:id="@+id/btnAccessibility"
+            style="@style/ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
             android:text="开启无障碍服务"
-            android:textSize="14sp"
-            android:backgroundTint="@color/primary"
-            android:textColor="@color/on_primary" />
+            android:textSize="14sp" />
 
         <!-- 默认桌面按钮 + 开机自启 -->
         <TextView
@@ -302,14 +357,13 @@
 
         <Button
             android:id="@+id/btnSetDefaultHome"
+            style="@style/ButtonStyle.Outlined"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="8dp"
             android:text="设置为默认桌面"
-            android:textSize="14sp"
-            android:backgroundTint="@color/primary"
-            android:textColor="@color/on_primary" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

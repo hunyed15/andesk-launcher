@@ -10,13 +10,14 @@
     <LinearLayout
         android:id="@+id/searchCapsule"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@drawable/bg_glass_pill"
+        android:elevation="4dp"
         android:paddingHorizontal="20dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginTop="@dimen/top_bar_margin"
+        android:layout_marginStart="@dimen/top_bar_margin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
         <ImageView android:layout_width="20dp" android:layout_height="20dp"
@@ -29,81 +30,87 @@
     <!-- 右侧组件 -->
     <LinearLayout
         android:id="@+id/controlCenter"
-        android:layout_width="wrap_content" android:layout_height="48dp"
+        android:layout_width="wrap_content" android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal" android:gravity="center_vertical"
-        android:background="@drawable/bg_glass_pill" android:paddingHorizontal="16dp"
-        android:layout_marginTop="24dp" android:layout_marginEnd="24dp"
-        android:paddingStart="16dp" android:paddingEnd="4dp"
+        android:background="@drawable/bg_glass_pill"
+        android:elevation="4dp"
+        android:paddingHorizontal="8dp"
+        android:layout_marginTop="@dimen/top_bar_margin"
+        android:layout_marginEnd="@dimen/top_bar_margin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <!-- WiFi -->
         <ImageView android:id="@+id/btnWifiSettings"
-            android:layout_width="18dp" android:layout_height="18dp"
-            android:src="@drawable/ic_wifi" android:tint="@color/muted"
-            android:contentDescription="WiFi设置"
-            android:layout_marginEnd="12dp" />
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_wifi" android:scaleType="fitCenter"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="WiFi设置" />
 
-        <!-- 电池 -->
-        <FrameLayout android:id="@+id/btnBatterySettings"
-            android:layout_width="28dp" android:layout_height="20dp"
-            android:layout_marginEnd="12dp"
+        <!-- 电池 + 百分比 -->
+        <LinearLayout
+            android:id="@+id/btnBatterySettings"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/top_control_size"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/top_control_padding"
             android:contentDescription="电池设置">
-            <ImageView android:layout_width="28dp" android:layout_height="20dp"
+            <ImageView
+                android:layout_width="22dp" android:layout_height="22dp"
                 android:src="@drawable/ic_battery" android:tint="@color/muted"
                 android:scaleType="fitCenter" />
-            <TextView android:id="@+id/tvBatteryPercent"
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:gravity="center" android:text="--"
-                android:textSize="7sp" android:textStyle="bold"
-                android:textColor="@color/muted"
-                android:includeFontPadding="false" />
-        </FrameLayout>
+            <TextView
+                android:id="@+id/tvBatteryPercent"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="--" android:textSize="@dimen/text_xl"
+                android:textColor="@color/muted" android:fontFamily="sans-serif-medium"
+                android:layout_marginStart="@dimen/spacing_sm" />
+        </LinearLayout>
 
         <!-- 分隔线 -->
-        <View android:layout_width="1dp" android:layout_height="20dp"
-            android:background="@color/outline" android:layout_marginEnd="8dp" />
+        <View android:layout_width="1dp" android:layout_height="@dimen/top_separator_height"
+            android:background="@color/outline" android:layout_marginStart="@dimen/top_control_spacing"
+            android:layout_marginEnd="@dimen/top_control_spacing" />
 
         <!-- 时间 -->
         <TextView android:id="@+id/statusTime" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:text="14:32"
             android:textSize="15sp" android:textColor="@color/muted"
             android:fontFamily="sans-serif-medium"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="@dimen/top_control_spacing" />
 
         <!-- 分隔线 -->
-        <View android:layout_width="1dp" android:layout_height="20dp"
-            android:background="@color/outline" android:layout_marginEnd="8dp" />
+        <View android:layout_width="1dp" android:layout_height="@dimen/top_separator_height"
+            android:background="@color/outline" android:layout_marginStart="@dimen/top_control_spacing"
+            android:layout_marginEnd="@dimen/top_control_spacing" />
 
         <!-- 清理内存 -->
         <ImageView android:id="@+id/btnCleanup"
-            android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
             android:src="@drawable/ic_rocket" android:scaleType="centerInside"
-            android:padding="6dp" android:tint="@color/muted"
-            android:contentDescription="清理内存"
-            android:layout_marginEnd="8dp" />
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="清理内存" />
 
         <!-- 设置 -->
         <ImageView android:id="@+id/btnSettings"
-            android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
             android:src="@drawable/ic_settings" android:scaleType="centerInside"
-            android:padding="6dp" android:tint="@color/muted"
-            android:contentDescription="设置"
-            android:layout_marginEnd="8dp" />
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="设置" />
 
         <!-- 主题切换 -->
         <ImageView android:id="@+id/btnThemeToggle"
-            android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
             android:src="@drawable/ic_theme_dark" android:scaleType="centerInside"
-            android:padding="6dp" android:tint="@color/muted"
-            android:contentDescription="切换主题"
-            android:layout_marginEnd="8dp" />
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="切换主题" />
 
         <!-- 电源菜单 -->
         <ImageView android:id="@+id/btnPowerMenu"
-            android:layout_width="32dp" android:layout_height="32dp"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
             android:src="@drawable/ic_power" android:scaleType="centerInside"
-            android:padding="6dp" android:tint="@color/muted"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
             android:contentDescription="电源菜单" />
 
     </LinearLayout>
@@ -113,8 +120,10 @@
         android:id="@+id/mainLayout"
         android:layout_width="0dp" android:layout_height="0dp"
         android:orientation="horizontal"
-        android:layout_marginTop="80dp" android:layout_marginBottom="100dp"
-        android:layout_marginStart="40dp" android:layout_marginEnd="40dp"
+        android:layout_marginTop="@dimen/home_margin_top"
+        android:layout_marginBottom="@dimen/home_margin_bottom"
+        android:layout_marginStart="@dimen/home_margin_sides"
+        android:layout_marginEnd="@dimen/home_margin_sides"
         app:layout_constraintTop_toBottomOf="@id/searchCapsule"
         app:layout_constraintBottom_toTopOf="@id/dockBar"
         app:layout_constraintStart_toStartOf="parent"
@@ -125,18 +134,21 @@
             android:id="@+id/glanceSidebar"
             android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="30" android:orientation="vertical"
-            android:layout_marginEnd="20dp">
+            android:layout_marginEnd="@dimen/home_sidebar_gap">
 
             <!-- 天气卡片（时钟+天气左右布局） -->
             <FrameLayout
                 android:id="@+id/weatherCard"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:background="@drawable/bg_info_card"
-                android:padding="20dp" android:layout_marginBottom="24dp">
+                android:elevation="4dp"
+                android:padding="@dimen/home_card_padding"
+                android:layout_marginBottom="@dimen/home_card_gap">
                 <ImageView android:id="@+id/weatherBgIcon" android:layout_width="160dp"
                     android:layout_height="160dp" android:layout_gravity="bottom|end"
                     android:layout_marginBottom="-20dp" android:layout_marginEnd="-20dp"
-                    android:alpha="0.08" android:rotation="-15" android:scaleType="fitCenter" />
+                    android:alpha="0.08" android:rotation="-15" android:scaleType="fitCenter"
+                    android:importantForAccessibility="no" />
                 <LinearLayout android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:orientation="vertical">
                     <!-- 第1行：时间 | 天气图标 -->
@@ -186,18 +198,25 @@
                 android:id="@+id/hitokotoCard"
                 android:layout_width="match_parent" android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_info_card" android:padding="24dp">
+                android:background="@drawable/bg_info_card"
+                android:elevation="4dp"
+                android:padding="24dp">
                 <ImageButton android:id="@+id/btnRefreshHitokoto"
-                    android:layout_width="18dp" android:layout_height="18dp"
+                    android:layout_width="34dp" android:layout_height="34dp"
                     android:layout_gravity="top|end" android:background="@drawable/bg_refresh_button"
                     android:src="@drawable/ic_refresh" android:scaleType="centerInside"
-                    android:padding="4dp" android:contentDescription="刷新" />
+                    android:padding="8dp" android:tint="@color/primary"
+                    android:contentDescription="刷新诗句" />
                 <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="今日诗词" android:textSize="12sp"
+                        android:textColor="@color/primary" android:letterSpacing="0.08"
+                        android:layout_marginBottom="12dp" />
                     <TextView android:id="@+id/tvHitokoto" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="人生如戏，唯有入戏，方能始终。"
                         android:textSize="17sp" android:textColor="@color/on_surface"
-                        android:textStyle="italic" android:maxWidth="280dp"
+                        android:textStyle="italic" android:maxWidth="300dp"
                         android:maxLines="4" android:ellipsize="end" android:gravity="center" />
                     <TextView android:id="@+id/tvHitokotoFrom" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text=" ——慕夜"
@@ -213,7 +232,7 @@
             android:layout_width="0dp" android:layout_height="match_parent"
             android:layout_weight="70" android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_marginStart="20dp">
+            android:layout_marginStart="@dimen/home_sidebar_gap">
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager"
                 android:layout_width="match_parent" android:layout_height="0dp"
@@ -260,8 +279,9 @@
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:orientation="horizontal" android:gravity="center_vertical"
         android:background="@drawable/bg_glass_dock"
+        android:elevation="8dp"
         android:paddingHorizontal="10dp" android:paddingVertical="10dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="@dimen/dock_bar_margin_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -281,7 +301,8 @@
             android:background="@color/dock_divider" android:layout_marginHorizontal="4dp" />
         <ImageView android:id="@+id/btnAllApps" android:layout_width="56dp"
             android:layout_height="56dp" android:src="@drawable/ic_apps_grid"
-            android:scaleType="centerInside" android:tint="@color/muted" />
+            android:scaleType="centerInside" android:tint="@color/muted"
+            android:contentDescription="所有应用" />
     </LinearLayout>
 
     <!-- Toast -->

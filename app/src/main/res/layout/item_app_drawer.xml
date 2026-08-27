@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textSize="12sp"
+        android:textSize="@dimen/app_label_size"
         android:textColor="@color/on_surface"
         android:gravity="center"
         android:maxLines="1"

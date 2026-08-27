@@ -12,6 +12,7 @@ import coil.load
 import com.andesk.launcher.R
 import com.andesk.launcher.data.model.AppInfo
 import com.andesk.launcher.data.model.Folder
+import com.andesk.launcher.util.MotionUtils
 import java.util.Collections
 
 /**
@@ -112,7 +113,11 @@ class DesktopGridAdapter(
 
         fun bind(appInfo: AppInfo, editMode: Boolean) {
             tvAppName.text = appInfo.name
-            
+
+            // 无障碍：整项与图标都以应用名朗读
+            itemView.contentDescription = appInfo.name
+            ivAppIcon.contentDescription = appInfo.name
+
             ivAppIcon.load(appInfo.icon) {
                 size(128)
                 crossfade(true)
@@ -140,6 +145,9 @@ class DesktopGridAdapter(
         }
 
         private fun startJiggleAnimation() {
+            // 尊重系统"关闭动画"设置（Reduce Motion），跳过循环抖动
+            if (MotionUtils.isAnimationDisabled(itemView.context)) return
+
             val rotate = RotateAnimation(
                 -1.5f, 1.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f,
@@ -165,6 +173,8 @@ class DesktopGridAdapter(
 
         fun bind(folder: Folder) {
             tvFolderName.text = folder.name
+            // 无障碍：文件夹朗读
+            itemView.contentDescription = "文件夹：${folder.name}"
 
             val icons = listOf(folderIcon1, folderIcon2, folderIcon3, folderIcon4)
             val appPackageNames = folder.apps.take(4)

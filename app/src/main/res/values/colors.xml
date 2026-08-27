@@ -15,8 +15,8 @@
     
     <color name="on_primary">#FFFFFF</color>
     <color name="on_surface">#1A1C2A</color>
-    <color name="on_surface_dim">#991A1C2A</color>
-    <color name="muted">#991A1C2A</color>
+    <color name="on_surface_dim">#B81A1C2A</color>
+    <color name="muted">#B81A1C2A</color>
     
     <color name="surface_variant">#EAF0F7</color>
     <color name="surface_tint">#F0F4FA</color>
@@ -25,15 +25,18 @@
     <color name="error_container">#4DFF453A</color>
     
     <color name="clock_text">#1A1C2A</color>
-    <color name="clock_text_secondary">#991A1C2A</color>
+    <color name="clock_text_secondary">#B81A1C2A</color>
     
     <color name="weather_text">#1A1C2A</color>
-    <color name="weather_text_secondary">#991A1C2A</color>
+    <color name="weather_text_secondary">#B81A1C2A</color>
     
     <color name="inverse_on_surface">#F0F0F0</color>
-    
+
+    <color name="overlay_surface">#E6F7F9FC</color>
+
     <color name="dock_bg">#DDF7F9FC</color>
     <color name="dock_divider">#24708090</color>
     
     <color name="outline_variant">#2A8B96A8</color>
+    <color name="outline_button">#4D6F7890</color>
 </resources>

@@ -55,7 +55,11 @@ class AppDrawerAdapter(
 
         fun bind(appInfo: AppInfo) {
             tvAppName.text = appInfo.name
-            
+
+            // 无障碍：整项与图标都以应用名朗读
+            itemView.contentDescription = appInfo.name
+            ivAppIcon.contentDescription = appInfo.name
+
             // 使用Coil加载图标
             ivAppIcon.load(appInfo.icon) {
                 size(128)

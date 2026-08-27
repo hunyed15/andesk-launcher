@@ -1,6 +1,9 @@
 package com.andesk.launcher.ui.settings
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -11,16 +14,34 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.andesk.launcher.R
 import com.andesk.launcher.data.local.PrefsManager
+import com.andesk.launcher.service.KeyMappingAccessibilityService
 import com.andesk.launcher.service.KeyMappingService
 import com.andesk.launcher.util.DeviceUtils
+import com.andesk.launcher.util.KeyMappingKeys
 import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var prefsManager: PrefsManager
+
+    // 触发键选择项：预置键码 + 末尾自定义选项
+    private val presetCodes: List<Int> by lazy { KeyMappingKeys.presetCodes().toList() }
+    private val customIndex: Int get() = presetCodes.size
+    private var triggerSpinnerReady = false
+
+    private val keyCaptureReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == KeyMappingAccessibilityService.ACTION_KEY_CAPTURED) {
+                val code = intent.getIntExtra("keyCode", prefsManager.keyMappingKeyCode)
+                prefsManager.keyMappingKeyCode = code
+                syncTriggerKeySpinner(code)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +52,27 @@ class SettingsActivity : AppCompatActivity() {
         
         initViews()
         loadSettings()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(
+            keyCaptureReceiver,
+            IntentFilter(KeyMappingAccessibilityService.ACTION_KEY_CAPTURED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        updateKeyMappingHint()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try { unregisterReceiver(keyCaptureReceiver) } catch (_: Exception) {}
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // 离开设置页时清除录制状态，避免残留
+        KeyMappingAccessibilityService.capturePending = false
     }
 
     private fun setupFullScreen() {
@@ -93,6 +135,14 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        // 触发按键选择
+        setupTriggerKeySpinner()
+
+        // 自定义按键（录制）
+        findViewById<View>(R.id.btnRecordCustomKey)?.setOnClickListener {
+            startCustomKeyCapture()
+        }
+
         // 单击动作选择
         setupSingleClickSpinner()
         
@@ -140,6 +190,66 @@ class SettingsActivity : AppCompatActivity() {
                 prefsManager.bootStart = checked
             }
         }
+    }
+
+    private fun setupTriggerKeySpinner() {
+        val spinner = findViewById<Spinner>(R.id.spinnerTriggerKey) ?: return
+
+        val labels = KeyMappingKeys.presets.map { it.second }.toMutableList().apply {
+            add("自定义按键…")
+        }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        val saved = prefsManager.keyMappingKeyCode
+        val presetIdx = presetCodes.indexOf(saved)
+        val initialPos = if (presetIdx >= 0) presetIdx else customIndex
+        triggerSpinnerReady = false
+        spinner.setSelection(initialPos)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!triggerSpinnerReady) return
+                onTriggerKeySelected(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        updateKeyMappingHint()
+        spinner.post { triggerSpinnerReady = true }
+    }
+
+    private fun syncTriggerKeySpinner(code: Int) {
+        val spinner = findViewById<Spinner>(R.id.spinnerTriggerKey) ?: return
+        val presetIdx = presetCodes.indexOf(code)
+        triggerSpinnerReady = false
+        spinner.setSelection(if (presetIdx >= 0) presetIdx else customIndex)
+        spinner.post { triggerSpinnerReady = true }
+        updateKeyMappingHint()
+    }
+
+    private fun onTriggerKeySelected(position: Int) {
+        if (position == customIndex) {
+            startCustomKeyCapture()
+        } else {
+            prefsManager.keyMappingKeyCode = presetCodes[position]
+            updateKeyMappingHint()
+        }
+    }
+
+    private fun startCustomKeyCapture() {
+        if (!KeyMappingAccessibilityService.isRunning) {
+            Toast.makeText(this, "请先开启无障碍服务再录制", Toast.LENGTH_LONG).show()
+            return
+        }
+        KeyMappingAccessibilityService.capturePending = true
+        Toast.makeText(this, "请按下要设置的按键（按 Esc 取消）", Toast.LENGTH_LONG).show()
+    }
+
+    private fun updateKeyMappingHint() {
+        val hint = findViewById<TextView>(R.id.tvKeyMappingHint)
+        hint?.text = "当前单击 ${KeyMappingKeys.labelFor(prefsManager.keyMappingKeyCode)} 返回桌面"
     }
 
     private fun setupSingleClickSpinner() {
@@ -213,9 +323,13 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateKeyMappingVisibility(enabled: Boolean) {
+        findViewById<View>(R.id.layoutTriggerKey)?.alpha = if (enabled) 1.0f else 0.5f
+        findViewById<View>(R.id.layoutRecordKey)?.alpha = if (enabled) 1.0f else 0.5f
         findViewById<View>(R.id.layoutSingleClick)?.alpha = if (enabled) 1.0f else 0.5f
         findViewById<View>(R.id.layoutShowToast)?.alpha = if (enabled) 1.0f else 0.5f
-        
+
+        findViewById<Spinner>(R.id.spinnerTriggerKey)?.isEnabled = enabled
+        findViewById<View>(R.id.btnRecordCustomKey)?.isEnabled = enabled
         findViewById<Spinner>(R.id.spinnerSingleClick)?.isEnabled = enabled
         findViewById<Switch>(R.id.switchShowToast)?.isEnabled = enabled
     }

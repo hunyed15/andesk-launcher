@@ -99,7 +99,10 @@ class HomeActivity : AppCompatActivity() {
             val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
             if (level >= 0 && scale > 0) {
-                tvBatteryPercent.text = ((level * 100) / scale).toString()
+                val percent = (level * 100) / scale
+                tvBatteryPercent.text = percent.toString()
+                // 无障碍：朗读电量百分比
+                tvBatteryPercent.contentDescription = "电量 $percent%"
             }
         }
     }
@@ -368,10 +371,13 @@ class HomeActivity : AppCompatActivity() {
             imageView.clearColorFilter()
             imageView.setImageDrawable(appInfo.icon)
             imageView.alpha = 1.0f
+            // 无障碍：以应用名朗读
+            imageView.contentDescription = appInfo.name
         } else {
             imageView.setImageResource(R.drawable.ic_add)
             imageView.setColorFilter(ContextCompat.getColor(this, R.color.muted))
             imageView.alpha = 0.85f
+            imageView.contentDescription = "添加应用到 Dock"
         }
     }
 
