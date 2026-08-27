@@ -128,6 +128,7 @@ class HomeActivity : AppCompatActivity() {
         private const val PERMISSION_REQUEST_CODE = 1001
         private const val TYPE_CLASSIC = "classic"
         private const val TYPE_DEEPIN = "deepin"
+        private const val TYPE_WINDOWS = "windows"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,6 +150,7 @@ class HomeActivity : AppCompatActivity() {
         setupViewPager()
         setupDockBar()
         setupClickListeners()
+        setupWindowsStartButton()
         
         // 注册广播接收器
         registerPackageReceiver()
@@ -193,7 +195,17 @@ class HomeActivity : AppCompatActivity() {
 
     private fun chooseLayoutRes(mode: String): Int = when (mode) {
         TYPE_DEEPIN -> R.layout.activity_home_deepin
+        TYPE_WINDOWS -> R.layout.activity_home_windows
         else -> R.layout.activity_home
+    }
+
+    /** Windows 布局：开始按钮 → 打开应用抽屉（当作开始菜单），无此按钮时跳过 */
+    private fun setupWindowsStartButton() {
+        findViewById<View>(R.id.btnStart)?.setOnClickListener {
+            val intent = Intent(this, AppDrawerActivity::class.java)
+            intent.putExtra("openSearch", true)
+            startActivity(intent)
+        }
     }
 
     private fun setupFullScreen() {

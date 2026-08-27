@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_wallpaper">
+
+    <!-- 桌面区：全屏应用分页 -->
+    <LinearLayout
+        android:id="@+id/windowsContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="@dimen/home_margin_top"
+        android:layout_marginBottom="20dp"
+        android:layout_marginHorizontal="@dimen/home_margin_sides"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/windowsTaskbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/pageIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+            <TextView
+                android:id="@+id/dot1" android:layout_width="@dimen/page_indicator_size"
+                android:layout_height="@dimen/page_indicator_size"
+                android:gravity="center" android:text="1"
+                android:textSize="@dimen/page_indicator_text_size"
+                android:textColor="@color/on_surface"
+                android:background="@drawable/bg_page_indicator_active"
+                android:layout_marginEnd="@dimen/page_indicator_spacing" />
+            <TextView
+                android:id="@+id/dot2" android:layout_width="@dimen/page_indicator_size"
+                android:layout_height="@dimen/page_indicator_size"
+                android:gravity="center" android:text="2"
+                android:textSize="@dimen/page_indicator_text_size"
+                android:textColor="@color/muted"
+                android:background="@drawable/bg_page_indicator"
+                android:layout_marginEnd="@dimen/page_indicator_spacing" />
+            <TextView
+                android:id="@+id/dot3" android:layout_width="@dimen/page_indicator_size"
+                android:layout_height="@dimen/page_indicator_size"
+                android:gravity="center" android:text="3"
+                android:textSize="@dimen/page_indicator_text_size"
+                android:textColor="@color/muted"
+                android:background="@drawable/bg_page_indicator"
+                android:layout_marginEnd="@dimen/page_indicator_spacing" />
+            <TextView
+                android:id="@+id/dot4" android:layout_width="@dimen/page_indicator_size"
+                android:layout_height="@dimen/page_indicator_size"
+                android:gravity="center" android:text="4"
+                android:textSize="@dimen/page_indicator_text_size"
+                android:textColor="@color/muted"
+                android:background="@drawable/bg_page_indicator" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 底部任务栏（Windows 风格） -->
+    <LinearLayout
+        android:id="@+id/windowsTaskbar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/taskbar_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_taskbar"
+        android:elevation="8dp"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 开始按钮 -->
+        <ImageView
+            android:id="@+id/btnStart"
+            android:layout_width="@dimen/top_control_size"
+            android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_start"
+            android:scaleType="centerInside"
+            android:padding="6dp"
+            android:tint="@color/on_surface"
+            android:background="@drawable/bg_back_button"
+            android:contentDescription="开始菜单" />
+
+        <!-- 固定到任务栏的应用 -->
+        <ImageView
+            android:id="@+id/dockIcon1" android:layout_width="40dp" android:layout_height="40dp"
+            android:padding="6dp" android:scaleType="fitCenter" android:layout_marginStart="8dp" />
+        <ImageView
+            android:id="@+id/dockIcon2" android:layout_width="40dp" android:layout_height="40dp"
+            android:padding="6dp" android:scaleType="fitCenter" />
+        <ImageView
+            android:id="@+id/dockIcon3" android:layout_width="40dp" android:layout_height="40dp"
+            android:padding="6dp" android:scaleType="fitCenter" />
+        <ImageView
+            android:id="@+id/dockIcon4" android:layout_width="40dp" android:layout_height="40dp"
+            android:padding="6dp" android:scaleType="fitCenter" />
+
+        <Space
+            android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+
+        <!-- 系统托盘 -->
+        <TextView
+            android:id="@+id/statusTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="14:32"
+            android:textSize="15sp"
+            android:textColor="@color/on_surface"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginEnd="8dp" />
+
+        <LinearLayout
+            android:id="@+id/btnBatterySettings"
+            android:layout_width="wrap_content" android:layout_height="@dimen/top_control_size"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:paddingHorizontal="4dp" android:contentDescription="电池设置">
+            <ImageView
+                android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@drawable/ic_battery" android:tint="@color/muted"
+                android:scaleType="fitCenter" />
+            <TextView
+                android:id="@+id/tvBatteryPercent"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="--" android:textSize="@dimen/text_xl"
+                android:textColor="@color/muted" android:fontFamily="sans-serif-medium"
+                android:layout_marginStart="2dp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnWifiSettings"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_wifi" android:scaleType="fitCenter"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="WiFi设置" />
+        <ImageView
+            android:id="@+id/btnSettings"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_settings" android:scaleType="centerInside"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="设置" />
+        <ImageView
+            android:id="@+id/btnThemeToggle"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_theme_dark" android:scaleType="centerInside"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="切换主题" />
+        <ImageView
+            android:id="@+id/btnPowerMenu"
+            android:layout_width="@dimen/top_control_size" android:layout_height="@dimen/top_control_size"
+            android:src="@drawable/ic_power" android:scaleType="centerInside"
+            android:padding="@dimen/top_control_padding" android:tint="@color/muted"
+            android:contentDescription="电源" />
+    </LinearLayout>
+
+    <!-- 窗口/dock 需要的隐藏元素（HomeActivity 会更新其文本，避免空指针） -->
+    <TextView
+        android:id="@+id/tvTime" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <TextView
+        android:id="@+id/tvDate" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <ImageView
+        android:id="@+id/weatherIcon" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" />
+    <TextView
+        android:id="@+id/weatherTemp" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <TextView
+        android:id="@+id/weatherCity" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <TextView
+        android:id="@+id/weatherDesc" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <ImageView
+        android:id="@+id/weatherBgIcon" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" />
+    <TextView
+        android:id="@+id/tvHitokoto" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <TextView
+        android:id="@+id/tvHitokotoFrom" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <ImageButton
+        android:id="@+id/btnRefreshHitokoto" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" />
+    <ImageView
+        android:id="@+id/btnAllApps" android:layout_width="0dp"
+        android:layout_height="0dp" android:visibility="gone" />
+
+    <!-- Toast -->
+    <TextView
+        android:id="@+id/toastView" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:background="@drawable/bg_toast"
+        android:textColor="@color/on_surface" android:textSize="15sp"
+        android:fontFamily="sans-serif-medium" android:paddingHorizontal="32dp"
+        android:paddingVertical="12dp" android:elevation="8dp" android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/windowsTaskbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

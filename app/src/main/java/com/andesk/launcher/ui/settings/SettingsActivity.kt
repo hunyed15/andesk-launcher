@@ -258,8 +258,8 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupLayoutSpinner() {
         val spinner = findViewById<Spinner>(R.id.spinnerLayout) ?: return
 
-        val options = arrayOf("经典（侧边卡片）", "Deepin Dock 风格")
-        val values = arrayOf("classic", "deepin")
+        val options = arrayOf("经典（侧边卡片）", "Deepin Dock 风格", "Windows 任务栏")
+        val values = arrayOf("classic", "deepin", "windows")
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
